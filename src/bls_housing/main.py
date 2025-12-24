@@ -1,5 +1,5 @@
 import sys
-from notebook_proj.data_utils import load_records, compute_average
+from bls_housing.data_utils import load_records, compute_average
 
 def main() -> None:
     """Run the template."""

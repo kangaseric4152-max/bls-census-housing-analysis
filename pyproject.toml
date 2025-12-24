@@ -1,12 +1,12 @@
 [project]
-name = "python-jupyter-notebook-template"
+name = "bls_housing"
 version = "0.1.0"
 description = "A minimal Python jupyter notebook project template using Poetry, and mypy."
 authors = [
 	{ name = "Eric Kangas", email = "kangas.eric4152@gmail.com" }
 ]
 readme = "README.md"
-packages = [{ include = "notebook_proj", from = "src" }]
+packages = [{ include = "bls_housing", from = "src" }]
 requires-python = ">=3.12"
 dependencies = [
     "requests (>=2.32.5,<3.0.0)",
@@ -24,12 +24,12 @@ dev = [
 ]
 
 [tool.poetry]
-name = "python-jupyter-notebook-template"
+name = "bls_housing"
 version = "0.1.0"
-description = "A minimal Python jupyter notebook project template using Poetry, and mypy."
-authors = ["Your Name <you@example.com>"]
+description = "BLS Housing data project"
+authors = ["Eric Kangas <you@example.com>"]
 readme = "README.md"
-packages = [{ include = "notebook_proj", from = "src" }]
+packages = [{ include = "bls_housing", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -38,5 +38,5 @@ python = "^3.12"
 mypy = "^1.11"
 
 [tool.poetry.scripts]
-project-name = "notebook_proj.main:main"
+project-name = "bls_housing.main:main"
 check = "pytest:main"
