@@ -1,0 +1,42 @@
+[project]
+name = "python-jupyter-notebook-template"
+version = "0.1.0"
+description = "A minimal Python jupyter notebook project template using Poetry, and mypy."
+authors = [
+	{ name = "Eric Kangas", email = "kangas.eric4152@gmail.com" }
+]
+readme = "README.md"
+packages = [{ include = "notebook_proj", from = "src" }]
+requires-python = ">=3.12"
+dependencies = [
+    "requests (>=2.32.5,<3.0.0)",
+    "pandas (>=2.3.3,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "mypy (>=1.18.2,<2.0.0)",
+]
+
+[tool.poetry]
+name = "python-jupyter-notebook-template"
+version = "0.1.0"
+description = "A minimal Python jupyter notebook project template using Poetry, and mypy."
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{ include = "notebook_proj", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.11"
+
+[tool.poetry.scripts]
+project-name = "notebook_proj.main:main"
+check = "pytest:main"

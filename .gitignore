@@ -1,0 +1,21 @@
+# Virtual environments
+.venv/
+.env
+__pycache__/
+*.pyc
+
+# Poetry files
+poetry.lock
+
+# VS Code
+.vscode/
+
+# Test and coverage output
+htmlcov/
+.tox/
+.coverage
+.pytest_cache/
+
+# OS junk
+.DS_Store
+Thumbs.db
