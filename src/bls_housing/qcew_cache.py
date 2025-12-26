@@ -18,6 +18,10 @@ import pandas as pd
 import requests
 
 
+# Repository root (two levels up from this file: src/bls_housing -> src -> repo root)
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
 def qcew_get_area_url(year: str, qtr: str, area: str) -> str:
     """Return the QCEW area CSV download URL for given year, quarter, and area code.
 
@@ -36,12 +40,17 @@ def _cache_filename(area: str, year: str, qtr: str) -> str:
 
 def _ensure_cache_dir(cache_dir: str) -> Path:
     p = Path(cache_dir)
+    if not p.is_absolute():
+        p = REPO_ROOT / p
     p.mkdir(parents=True, exist_ok=True)
     return p
 
 
 def get_cached_path(area: str, year: str, qtr: str, cache_dir: str = "data/cache") -> Optional[Path]:
-    p = Path(cache_dir) / _cache_filename(area, year, qtr)
+    p = Path(cache_dir)
+    if not p.is_absolute():
+        p = REPO_ROOT / p
+    p = p / _cache_filename(area, year, qtr)
     return p if p.exists() else None
 
 
@@ -89,6 +98,11 @@ def load_area_df(
     """
     csv_path = fetch_area_csv(area, year, qtr, cache_dir=cache_dir, force_download=force_download)
     return pd.read_csv(csv_path, **pd_read_csv_kwargs)
+
+
+# Changed: use top-level "data" directory (repo root /data)
+CACHE_DIR = REPO_ROOT / "data" / "cache"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 __all__ = [
