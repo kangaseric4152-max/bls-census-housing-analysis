@@ -10,7 +10,7 @@ The cache stores files under `cache_dir` (default: `[project root]/data/cache`).
 
 from __future__ import annotations
 
-import os
+# import os
 from pathlib import Path
 from typing import Optional
 
@@ -20,7 +20,6 @@ import requests
 
 # Repository root (two levels up from this file: src/bls_housing -> src -> repo root)
 REPO_ROOT = Path(__file__).resolve().parents[2]
-# Changed: use top-level "data" directory (repo root /data), default cache dir
 CACHE_DIR = REPO_ROOT / "data" / "cache"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -42,8 +41,6 @@ def _cache_filename(area: str, year: str, qtr: str) -> str:
 
 def _ensure_cache_dir(cache_dir: str | Path = CACHE_DIR) -> Path:
     p = Path(cache_dir)
-    # if not p.is_absolute():
-    #    p = REPO_ROOT / p
     p.mkdir(parents=True, exist_ok=True)
     return p
 
