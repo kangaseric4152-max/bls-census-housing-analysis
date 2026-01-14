@@ -101,3 +101,21 @@ This repository provides utilities and a Jupyter notebook to fetch and analyze Q
 - Add simple functions to fetch and cache area CSVs and to return cleaned DataFrames for downstream analysis.
 
 - Compute Y/Y wage growth for Seattle MSA using total quarterly wages (Q1 vs Q1 prior year), before introducing housing.
+
+
+---
+Census 
+
+BLS QCEW CODES 
+Seattle-Tacoma-Bellevue C4266
+Portland-Vancouver-Hillsboro C3890
+
+Census data 
+Seattle-Tacoma-Bellevue CBSA Code 42660
+Portland-Vancouver-Hillsboro 38900
+
+Building permits data were accessed from Census BPS historical releases; recent publication schedules were adjusted due to a federal funding lapse, but historical data remain unaffected.
+
+building permit link format after 2019: https://www.census.gov/construction/bps/xls/cbsamonthly_202501.xls
+
+Note: Preliminary data released 12th workday of each month, revised data released 18th workday of each month.
