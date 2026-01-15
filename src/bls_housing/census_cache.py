@@ -90,8 +90,12 @@ def fetch_cbsa_xls(
         return cached
 
     url = get_census_cbsa_url(year, mon)
-    resp = requests.get(url, timeout=timeout)
-    resp.raise_for_status()
+    try:
+        resp = requests.get(url, timeout=timeout)
+    except requests.RequestException as e:
+        raise RuntimeError(f"Failed to download {url}: {e}") from e
+    if resp.status_code >= 400:
+        raise RuntimeError(f"Failed to download {url}: HTTP {resp.status_code}")
 
     out_path = cache_dir_path / _xls_filename(year, mon)
     tmp_path = out_path.with_suffix(out_path.suffix + ".tmp")
@@ -150,6 +154,15 @@ def clean_and_convert_xls_to_csv(xls_path: Path, csv_path: Path) -> None:
 
     df.columns = new_cols
 
+    # Basic validation: ensure a few expected columns are present
+    expected = ["CBSA", "Name", "Total"]
+    missing = [c for c in expected if c not in df.columns]
+    if missing:
+        raise ValueError(
+            f"Missing expected columns in cleaned CSV: {missing}. "
+            f"Source XLS: {xls_path}, detected header row starting at index {header_idx}"
+        )
+
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(csv_path, index=False)
 
@@ -189,7 +202,17 @@ def load_cbsa_df(
     Any additional keyword args are forwarded to `pandas.read_csv`.
     """
     csv_path = fetch_cbsa_csv(year, mon, csv_cache_dir=csv_cache_dir, xls_cache_dir=xls_cache_dir, force_download=force_download)
-    return pd.read_csv(csv_path, **pd_read_csv_kwargs)
+    df = pd.read_csv(csv_path, **pd_read_csv_kwargs)
+
+    # Basic validation for expected Census CBSA columns
+    expected = ["CBSA", "Name", "Total"]
+    missing = [c for c in expected if c not in df.columns]
+    if missing:
+        raise ValueError(
+            f"Missing expected Census CBSA columns: {missing}. Source CSV: {csv_path}"
+        )
+
+    return df
 
 
 

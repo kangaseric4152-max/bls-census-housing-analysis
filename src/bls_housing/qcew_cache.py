@@ -67,8 +67,12 @@ def fetch_area_csv(
         return cached
 
     url = qcew_get_area_url(year, qtr, area)
-    resp = requests.get(url, timeout=timeout)
-    resp.raise_for_status()
+    try:
+        resp = requests.get(url, timeout=timeout)
+    except requests.RequestException as e:
+        raise RuntimeError(f"Failed to download {url}: {e}") from e
+    if resp.status_code >= 400:
+        raise RuntimeError(f"Failed to download {url}: HTTP {resp.status_code}")
 
     out_path = cache_dir_path / _cache_filename(area, year, qtr)
     tmp_path = out_path.with_suffix(out_path.suffix + ".tmp")
@@ -92,7 +96,17 @@ def load_area_df(
     Any additional keyword args are forwarded to `pandas.read_csv`.
     """
     csv_path = fetch_area_csv(area, year, qtr, cache_dir=cache_dir, force_download=force_download)
-    return pd.read_csv(csv_path, **pd_read_csv_kwargs)
+    df = pd.read_csv(csv_path, **pd_read_csv_kwargs)
+
+    # Basic validation for expected QCEW columns
+    expected = ["agglvl_code", "total_qtrly_wages"]
+    missing = [c for c in expected if c not in df.columns]
+    if missing:
+        raise ValueError(
+            f"Missing expected QCEW columns: {missing}. Source CSV: {csv_path}"
+        )
+
+    return df
 
 
 
