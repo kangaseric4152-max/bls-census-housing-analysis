@@ -2,6 +2,8 @@
 
 This repository provides small, reusable utilities and a Jupyter notebook to fetch, cache, and analyze area-level housing and employment data from the U.S. Bureau of Labor Statistics (QCEW) and the U.S. Census (Building Permits Survey — BPS).
 
+The current notebook focuses on aggregating CBSA-level wage and housing permit data and computing year-over-year changes; it does not attempt to model prices, completions, or causality.
+
 The project is intentionally lightweight and written for learning and reproducible exploration. Current features implemented:
 
 - Helpers to download and cache BLS QCEW area CSVs (quarterly area data).
@@ -16,9 +18,9 @@ Quick repo layout
 - `data/cache/` — local cache for downloaded and converted files (`census/xls`, `census/csv`, etc.).
 - `pyproject.toml` — project and dependency metadata (Poetry).
 
-Data sources (accurate & descriptive)
-- BLS QCEW (Quarterly Census of Employment and Wages): area-level CSVs from the BLS CEW API. These files contain employment and wage data by area and aggregation level (MSA, county, etc.). The project uses `qcew_cache.py` to fetch and cache these CSVs.
-- U.S. Census Building Permits Survey (BPS) — CBSA monthly releases: published as XLS files (since 2019 path format). Example XLS URL:
+Data sources 
+- BLS QCEW (Quarterly Census of Employment and Wages): area-level employment and wage data in CSVs from the BLS CEW API. These files contain employment and wage data by area and aggregation level (MSA, county, etc.). The project uses `qcew_cache.py` to fetch and cache these CSVs.
+- U.S. Census Building Permits Survey (BPS) — CBSA monthly releases: published building permits as XLS files (since 2019 path format). Example XLS URL:
 
   - https://www.census.gov/construction/bps/xls/cbsamonthly_YYYYMM.xls
 
