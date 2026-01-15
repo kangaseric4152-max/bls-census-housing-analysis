@@ -34,9 +34,24 @@ Notes about the data
 Getting started
 1. Install dependencies (Poetry recommended):
 
+### Prerequisite: Poetry
+
+If you don’t already have Poetry installed, you can install it with:
+
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+```
+follow the instructions to add poetry to your path, and refresh your command line interface 
+by typing 
+```bash
+ 'bash' or 'source ~/.bashrc'
+```
+
+Make sure you're in the project directory and type
 ```bash
 poetry install
 ```
+
 
 2. Run the notebook in VS Code or Jupyter: open `scripts/housing.ipynb` and run cells. The notebook demonstrates using the cache utilities:
 
@@ -49,6 +64,8 @@ df = load_cbsa_df('2025','01')          # load cleaned CSV as a DataFrame
 **Repro run (quick)**
 
 1) Create the environment (Poetry):
+
+Note: if you don't have poetry installed, instructions are in the Getting Started section of this document.
 
 ```bash
 poetry install
