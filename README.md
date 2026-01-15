@@ -55,67 +55,65 @@ Cached CSVs are stored in `data/cache/` (example file: `data/cache/C4266_2025_1.
 - The repository references `mypy`/`ipykernel` for development; ensure your dev environment installs them if you use type checking or run notebooks.
 - There is a small smoke test script `test_env.py` but there are no formal pytest tests in the repo yet.
 +
-**Next steps / suggestions**
+**Next steps**
 - Move static area metadata (e.g., `AREA_CODES`) into a JSON/YAML file under `data/` or into `src/bls_housing/data.py` for reuse.
 - Add a minimal test suite (pytest) and include it in `[tool.poetry.dev-dependencies]` if you want `poetry run check`/`pytest` support.
 - Add README badges and a short example usage snippet from the notebook for quick reference.
 +
-If you'd like, I can also:
-- Normalize `pyproject.toml` to use either PEP 621 *or* Poetry table consistently.
-- Add a tiny `examples/` script that reproduces the notebook analysis end-to-end.
-+
+
 ---
 +
 Last updated to match repository contents on 2026-01-05.
-# Python Jupyter Notebook BLS Housing Project 
+## BLS & Census Housing — notebooks and utilities
 
-A lightweight, production-ready Python project starter built with:
-- Poetry (dependency management)
-- mypy (type checking)
-- dotenv (for environment config)
+This repository provides small, reusable utilities and a Jupyter notebook to fetch, cache, and analyze area-level housing and employment data from the U.S. Bureau of Labor Statistics (QCEW) and the U.S. Census (Building Permits Survey — BPS).
 
+The project is intentionally lightweight and written for learning and reproducible exploration. Current features implemented:
 
+- Helpers to download and cache BLS QCEW area CSVs (quarterly area data).
+- Helpers to download Census BPS monthly CBSA XLS files, convert and clean them, and cache cleaned CSVs for fast re-use.
+- A Jupyter notebook (`scripts/housing.ipynb`) with example analysis showing how to load cached CSVs and compute simple metrics (e.g., monthly permits, year-to-year change).
 
-# Install dependencies
+Why caching: downloading raw XLS/CSV files on every run is slow and brittle. The project converts raw Census XLS files into cleaned CSVs stored under `data/cache/census/csv/` and reuses them until you force a refresh.
+
+Quick repo layout
+- `src/bls_housing/` — core package with cache utilities: `qcew_cache.py` (BLS QCEW), `census_cache.py` (Census BPS XLS→CSV), and a small `main.py`.
+- `scripts/housing.ipynb` — notebook demonstrating data fetch, cleaning, and example analyses.
+- `data/cache/` — local cache for downloaded and converted files (`census/xls`, `census/csv`, etc.).
+- `pyproject.toml` — project and dependency metadata (Poetry).
+
+Data sources
+- BLS QCEW (Quarterly Census of Employment and Wages): area-level CSVs from the BLS CEW API. These files contain employment and wage data by area and aggregation level (MSA, county, etc.). The project uses `qcew_cache.py` to fetch and cache these CSVs.
+- U.S. Census Building Permits Survey (BPS) — CBSA monthly releases: published as XLS files (since 2019 path format). Example XLS URL:
+
+	- https://www.census.gov/construction/bps/xls/cbsamonthly_YYYYMM.xls
+
+	The `census_cache.py` module downloads the XLS, detects the header row, normalizes duplicate column names (adds `_year_to_date` suffixes), and writes a cleaned CSV into `data/cache/census/csv/` for downstream analysis.
+
+Notes about the data
+- CBSA monthly XLS files include two groups of columns — current month and year-to-date — which the cleaning logic preserves by appending `_year_to_date` to duplicate headings.
+- BLS QCEW area CSVs include aggregation codes — e.g. `agglvl_code == 40` identifies MSA totals. The notebook demonstrates filtering by aggregation codes and summing quarterly/annual totals.
+- The BPS monthly files are preliminary on release and later revised. The project caches whatever the downloaded file contains; re-run with `force_download=True` in the cache helpers to refresh.
+
+Getting started
+1. Install dependencies (Poetry recommended):
+
+```bash
 poetry install
+```
 
-## Project overview
-This repository provides utilities and a Jupyter notebook to fetch and analyze QCEW (Quarterly Census of Employment and Wages) area-level data from the BLS. The main notebook is `scripts/housing.ipynb` which demonstrates how to:
+2. Run the notebook in VS Code or Jupyter: open `scripts/housing.ipynb` and run cells. The notebook demonstrates using the cache utilities:
 
-- Build a BLS data API URL for an area and quarter using `qcewGetAreaUrl(year, qtr, area)`.
-- Load area CSV data into a pandas `DataFrame` via `pd.read_csv(URLPATH)`.
-- Filter results by aggregation level (for MSA totals use `agglvl_code == 40`).
-- Use the `AREA_CODES` mapping for area metadata (e.g., `C4266` for Seattle-Tacoma-Bellevue).
+```python
+from bls_housing.census_cache import fetch_cbsa_csv, load_cbsa_df
+csv_path = fetch_cbsa_csv('2025','01')   # download + convert if needed
+df = load_cbsa_df('2025','01')          # load cleaned CSV as a DataFrame
+```
 
-## Important notes
-- Example area codes found in the notebook: `C4266` (Seattle-Tacoma-Bellevue, WA) and `C3890` (Portland-Vancouver-Hillsboro, OR-WA).
-- The notebook includes helper code (commented) for alternate HTTP fetching approaches using `urllib.request`.
-- When filtering: `agglvl_code == 40` means MSA total covered; `own_code == 0` is total ownership; `industry_code == 10` is all industries; `size_code == 0` is all establishment sizes.
-
-## How to run
-1. Ensure dependencies are installed: `poetry install`.
-2. Open the notebook `scripts/housing.ipynb` in Jupyter or VS Code and run cells.
-
-## Next steps
-- Consider converting `AREA_CODES` to a JSON/YAML data file or a small Python module in `src/bls_housing/` for reuse.
-- Add simple functions to fetch and cache area CSVs and to return cleaned DataFrames for downstream analysis.
-
-- Compute Y/Y wage growth for Seattle MSA using total quarterly wages (Q1 vs Q1 prior year), before introducing housing.
-
+Development notes & suggestions
+- Consider moving static area mappings (`AREA_CODES`, `CBSA_CODES`) into a small JSON under `data/` for reuse across notebooks.
+- Add dtype coercion and trimming of textual columns (e.g., `Name`) in `clean_and_convert_xls_to_csv` if you prefer typed CSVs — this is a safe next enhancement.
+- Add a minimal test suite (pytest) to validate the cache conversion and header-parsing logic.
 
 ---
-Data 
-
-BLS QCEW CODES 
-Seattle-Tacoma-Bellevue C4266
-Portland-Vancouver-Hillsboro C3890
-
-Census data 
-Seattle-Tacoma-Bellevue CBSA Code 42660
-Portland-Vancouver-Hillsboro 38900
-
-Building permits data were accessed from Census BPS historical releases; recent publication schedules were adjusted due to a federal funding lapse, but historical data remain unaffected.
-
-building permit link format after 2019: https://www.census.gov/construction/bps/xls/cbsamonthly_202501.xls
-
-Note: Preliminary data released 12th workday of each month, revised data released 18th workday of each month.
+Updated: 2026-01-15
