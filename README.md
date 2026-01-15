@@ -104,7 +104,7 @@ This repository provides utilities and a Jupyter notebook to fetch and analyze Q
 
 
 ---
-Census 
+Data 
 
 BLS QCEW CODES 
 Seattle-Tacoma-Bellevue C4266
