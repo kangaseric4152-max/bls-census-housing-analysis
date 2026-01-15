@@ -86,6 +86,8 @@ poetry run jupyter nbconvert --to notebook --execute scripts/housing.ipynb --Exe
 poetry run python3 -c "from bls_housing.census_cache import fetch_cbsa_csv; print(fetch_cbsa_csv('2025','01'))"
 ```
 
+The repro steps have been tested on a clean Linux environment.
+
 Where cache files land
 
 - Census XLS downloads: `data/cache/census/xls/` (raw `.xls` files)
