@@ -4,6 +4,8 @@ This repository provides small, reusable utilities and a Jupyter notebook to fet
 
 The current notebook focuses on aggregating CBSA-level wage and housing permit data and computing year-over-year changes; it does not attempt to model prices, completions, or causality.
 
+Two complementary pressure metrics are used: an annual ratio of growth rates and a cumulative index relative to a base year.
+
 The project is intentionally lightweight and written for learning and reproducible exploration. Current features implemented:
 
 - Helpers to download and cache BLS QCEW area CSVs (quarterly area data).
