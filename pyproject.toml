@@ -1,6 +1,6 @@
 [project]
 name = "bls_housing"
-version = "0.1.0"
+version = "0.2.0"
 description = "A minimal Python jupyter notebook project template using Poetry, and mypy."
 authors = [
 	{ name = "Eric Kangas", email = "kangas.eric4152@gmail.com" }
@@ -28,11 +28,6 @@ dev = [
 ]
 
 [tool.poetry]
-name = "bls_housing"
-version = "0.1.0"
-description = "BLS Housing data project"
-authors = ["Eric Kangas <you@example.com>"]
-readme = "README.md"
 packages = [{ include = "bls_housing", from = "src" }]
 
 [tool.poetry.dependencies]
@@ -42,6 +37,3 @@ xlrd = "^2.0.1"
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.11"
 
-[tool.poetry.scripts]
-project-name = "bls_housing.main:main"
-check = "pytest:main"
