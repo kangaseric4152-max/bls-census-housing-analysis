@@ -21,12 +21,18 @@ Quick repo layout
 - `pyproject.toml` — project and dependency metadata (Poetry).
 
 Data sources 
-- BLS QCEW (Quarterly Census of Employment and Wages): area-level employment and wage data in CSVs from the BLS CEW API. These files contain employment and wage data by area and aggregation level (MSA, county, etc.). The project uses `qcew_cache.py` to fetch and cache these CSVs.
+- BLS QCEW (Quarterly Census of Employment and Wages): area-level employment and wage data in CSVs from the BLS CEW API. These files contain employment and wage data by area and aggregation level (MSA, county, etc.). The project uses `qcew_cache.py` to fetch and cache these CSVs. 
+
+Info here: https://www.bls.gov/cew/additional-resources/open-data/csv-data-slices.htm
+This data api goes back to 2014. For previous data there's zip files available.
+
 - U.S. Census Building Permits Survey (BPS) — CBSA monthly releases: published building permits as XLS files (since 2019 path format). Example XLS URL:
 
   - https://www.census.gov/construction/bps/xls/cbsamonthly_YYYYMM.xls
 
   The `census_cache.py` module downloads the XLS, detects the header row, normalizes duplicate column names (adds `_year_to_date` suffixes), and writes a cleaned CSV into `data/cache/census/csv/` for downstream analysis.
+Census building construction data changed to excel format Nov 2019, before that it was in txt format. 
+
 
 Notes about the data
 - CBSA monthly XLS files include two groups of columns — current month and year-to-date — which the cleaning logic preserves by appending `_year_to_date` to duplicate headings.
