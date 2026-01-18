@@ -127,10 +127,10 @@ def convert_parsed_record(record):
         "Total": int(data_values[0]),
         "1 Unit": int(data_values[1]),
         "2 Unit": int(data_values[2]),
-        "3 & 4 Units": int(data_values[3]),
-        "5 or more Units": int(data_values[4]),
-        "Num of Structures With 5 Units or more": int(data_values[5]),
-        "Monthly Coverage Percent": float(data_values[6]),
+        "3 and 4 Units": int(data_values[3]),
+        "5 Units or More": int(data_values[4]),
+        "Num of Structures With 5 Units or More": int(data_values[5]),
+        "Monthly Coverage Percent*": float(data_values[6]),
     }
     return structured_record
 

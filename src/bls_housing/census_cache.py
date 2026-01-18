@@ -267,6 +267,7 @@ def load_cbsa_df(
     df = pd.read_csv(csv_path, **pd_read_csv_kwargs)
 
     # Basic validation for expected Census CBSA columns
+    # TODO, consider normalizing column names instead of strict matching
     expected = ["CBSA", "Name", "Total"]
     missing = [c for c in expected if c not in df.columns]
     if missing:
