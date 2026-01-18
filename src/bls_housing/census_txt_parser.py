@@ -123,7 +123,7 @@ def convert_parsed_record(record):
     structured_record = {
         "CSA": code_values[0],
         "CBSA": code_values[1],
-        "name": record["name"],
+        "Name": record["name"],
         "Total": int(data_values[0]),
         "1 Unit": int(data_values[1]),
         "2 Unit": int(data_values[2]),
@@ -133,6 +133,24 @@ def convert_parsed_record(record):
         "Monthly Coverage Percent": float(data_values[6]),
     }
     return structured_record
+
+
+def convert_census_txt_to_csv(txt_path: Path, csv_path: Path) -> None:
+    """Convert the census TXT format file to a cleaned CSV file."""
+    import pandas as pd
+
+    records = []
+    for parsed_record in _parse_census_stream(txt_path):
+        try:
+            structured_record = convert_parsed_record(parsed_record)
+            records.append(structured_record)
+        except ValueError as e:
+            logger.error(f"Error converting record: {e}")
+
+    df = pd.DataFrame(records)
+    df.to_csv(csv_path, index=False)
+    logger.debug(f"Converted TXT file {txt_path} to CSV file {csv_path}")
+
 
 def convert_census_txt_to_data_frame(txt_path: Path) -> 'pd.DataFrame':
     """Convert the census TXT format file to a pandas DataFrame."""

@@ -12,7 +12,7 @@ from typing import Optional
 
 import pandas as pd
 import requests
-
+from bls_housing.census_txt_parser import convert_census_txt_to_csv
 
 # Repository root (two levels up from this file: src/bls_housing -> src -> repo root)
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -20,7 +20,10 @@ XLS_DIR = REPO_ROOT / "data" / "cache" / "census" / "xls"
 XLS_DIR.mkdir(parents=True, exist_ok=True)
 CSV_DIR = REPO_ROOT / "data" / "cache" / "census" / "csv"
 CSV_DIR.mkdir(parents=True, exist_ok=True)
-
+RAW_TXT_DIR = REPO_ROOT / "data" / "cache" / "census" / "txt"
+RAW_TXT_DIR.mkdir(parents=True, exist_ok=True)
+CLEAN_CSV_DIR = REPO_ROOT / "data" / "cache" / "census" / "csv"
+CLEAN_CSV_DIR.mkdir(parents=True, exist_ok=True)
 
 def get_census_cbsa_url(year: str, mon: str) -> str:
     """Return the census area XLS download URL for given year, month, and CBSA code
@@ -31,17 +34,23 @@ def get_census_cbsa_url(year: str, mon: str) -> str:
     if(len(mon) == 1):
         mon = f"0{mon}"
 
-    # format for 2019-2023 
-    # https://www.census.gov/construction/bps/xls/msamonthly_202301.xls
 
-    if(int(year) < 2019):
-        # txt format from 2009 to Oct 2019
-        #todo, not implemented
-        raise NotImplementedError("Census CBSA URLs for years before 2019 are not implemented.")
+    # txt format from 2009 to Oct 2019
+    # https://www.census.gov/construction/bps/txt/tb3u201910.txt
+    # format for Nov 2019-2023 
+    # https://www.census.gov/construction/bps/xls/msamonthly_202301.xls
+    # format from 2024 onwards
+    # https://www.census.gov/construction/bps/xls/cbsamonthly_202401.xls
+
+    if(int(year) < 2009):
+        raise NotImplementedError("Census CBSA URLs for years before 2009 are not implemented.")
+    elif(int(year) < 2019):
+        url = "https://www.census.gov/construction/bps/txt/tb3u[YEAR][MON].txt"
     elif (int(year) == 2019):
         if(int(mon) < 11):
-            raise NotImplementedError("Census CBSA URLs for years before Nov 2019 are not implemented.")
-        url = "https://www.census.gov/construction/bps/xls/msamonthly_[YEAR][MON].xls"  
+            url = "https://www.census.gov/construction/bps/txt/tb3u[YEAR][MON].txt"
+        else: #Nov 2019 onwards uses xls format
+            url = "https://www.census.gov/construction/bps/xls/msamonthly_[YEAR][MON].xls"  
     elif(int(year) < 2024):
         url = "https://www.census.gov/construction/bps/xls/msamonthly_[YEAR][MON].xls"
     else:
@@ -82,6 +91,38 @@ def get_cached_xls_path(year: str, mon: str, cache_dir: str | Path = XLS_DIR) ->
 def get_cached_csv_path(year: str, mon: str, cache_dir: str | Path = CSV_DIR) -> Optional[Path]:
     p = Path(cache_dir) / _csv_filename(year, mon)
     return p if p.exists() else None
+
+def get_cached_txt_path(year: str, mon: str, cache_dir: str | Path = RAW_TXT_DIR) -> Optional[Path]:
+    p = Path(cache_dir) / f"tb3u{year}{_norm_mon(mon)}.txt"
+    return p if p.exists() else None
+
+
+def fetch_census_txt(
+    year: str,
+    mon: str,
+    cache_dir: str | Path = RAW_TXT_DIR,
+    force_download: bool = False,
+    *,
+    timeout: int = 30,
+) -> Path:
+    """Return a local Path to the census TXT. Use cached file if present unless `force_download`."""
+    cache_dir_path = _ensure_cache_dir(cache_dir)
+    cached = get_cached_txt_path(year, mon, cache_dir_path)
+    if cached and not force_download:
+        return cached       
+    url = get_census_cbsa_url(year, mon)
+    try:
+        resp = requests.get(url, timeout=timeout)
+    except requests.RequestException as e:
+        raise RuntimeError(f"Failed to download {url}: {e}") from e
+    if resp.status_code >= 400:
+        raise RuntimeError(f"Failed to download {url}: HTTP {resp.status_code}")        
+    out_path = cache_dir_path / f"tb3u{year}{_norm_mon(mon)}.txt"
+    tmp_path = out_path.with_suffix(out_path.suffix + ".tmp")
+    with open(tmp_path, "wb") as fh:
+        fh.write(resp.content)
+    tmp_path.replace(out_path)
+    return out_path
 
 
 def fetch_cbsa_xls(
@@ -183,11 +224,20 @@ def fetch_cbsa_csv(
     xls_cache_dir: str | Path = XLS_DIR,
     force_download: bool = False,
 ) -> Path:
-    """Return a local Path to the cleaned CBSA CSV, converting from XLS if necessary."""
+    """Return a local Path to the cleaned CBSA CSV, converting from XLS or TXT if necessary."""
     csv_cache_dir = _ensure_cache_dir(csv_cache_dir)
     cached = get_cached_csv_path(year, mon, csv_cache_dir)
     if cached and not force_download:
         return cached
+
+    # if before Nov 2019, use txt format
+    if(int(year) < 2019 or (int(year) == 2019 and int(mon) < 11)):
+        # Ensure TXT is downloaded
+        txt_path = fetch_census_txt(year, mon, cache_dir=RAW_TXT_DIR, force_download=force_download)
+        out_csv = Path(csv_cache_dir) / _csv_filename(year, mon)
+        convert_census_txt_to_csv(txt_path, out_csv)
+        return out_csv
+
 
     # Ensure XLS is downloaded
     xls_path = fetch_cbsa_xls(year, mon, cache_dir=xls_cache_dir, force_download=force_download)
@@ -198,6 +248,9 @@ def fetch_cbsa_csv(
 
 
 # Load area CSV into pandas DataFrame, with caching
+# If before Nov 2019, use old txt format parser instead of xls, 
+# branch into alternate loading path
+
 def load_cbsa_df(
     year: str,
     mon: str,

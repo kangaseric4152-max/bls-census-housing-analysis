@@ -10,7 +10,7 @@ from .census_cache import (
     fetch_cbsa_xls
 )
 
-from .census_txt_format_cache import (
+from .census_txt_parser import (
     convert_census_txt_to_data_frame
 )
 
