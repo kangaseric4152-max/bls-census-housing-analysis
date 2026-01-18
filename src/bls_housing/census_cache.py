@@ -33,7 +33,16 @@ def get_census_cbsa_url(year: str, mon: str) -> str:
 
     # format for 2019-2023 
     # https://www.census.gov/construction/bps/xls/msamonthly_202301.xls
-    if(int(year) < 2024):
+
+    if(int(year) < 2019):
+        # txt format from 2009 to Oct 2019
+        #todo, not implemented
+        raise NotImplementedError("Census CBSA URLs for years before 2019 are not implemented.")
+    elif (int(year) == 2019):
+        if(int(mon) < 11):
+            raise NotImplementedError("Census CBSA URLs for years before Nov 2019 are not implemented.")
+        url = "https://www.census.gov/construction/bps/xls/msamonthly_[YEAR][MON].xls"  
+    elif(int(year) < 2024):
         url = "https://www.census.gov/construction/bps/xls/msamonthly_[YEAR][MON].xls"
     else:
         url = "https://www.census.gov/construction/bps/xls/cbsamonthly_[YEAR][MON].xls"
