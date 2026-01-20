@@ -1,6 +1,6 @@
 [project]
 name = "bls_housing"
-version = "1.0.0"
+version = "1.3.0"
 description = "A minimal Python jupyter notebook project template using Poetry, and mypy."
 authors = [
 	{ name = "Eric Kangas", email = "kangas.eric4152@gmail.com" }
@@ -28,7 +28,7 @@ build-backend = "poetry.core.masonry.api"
 [dependency-groups]
 dev = [
     "mypy (>=1.18.2,<2.0.0)",
-    "ipykernel (>=7.1.0,<8.0.0)",
+    "ipykernel (>=7.1.0,<8.0.0)"
 ]
 
 [tool.poetry]
