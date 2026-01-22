@@ -16,7 +16,7 @@ data/
   ├── cache/              # Cache files from govt sources (BLS, Census)
   │                       # (ignored by git)
   ├── raw/                # Source-of-truth input data
-  │    │                 # (CSV, sampled govt files) 
+  │    │                  # (CSV, sampled govt files) 
   │    ├── metros.csv 
   │    └── README.md (optional) 
   │ 
