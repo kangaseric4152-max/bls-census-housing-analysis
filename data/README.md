@@ -15,15 +15,11 @@ can fully rebuild the DuckDB database locally.
 data/ 
   ├── cache/              # Cache files from govt sources (BLS, Census)
   │                       # (ignored by git)
-  ├── raw/                # Source-of-truth input data
-  │    │                  # (CSV, sampled govt files) 
-  │    ├── metros.csv 
-  │    └── README.md (optional) 
-  │ 
+  ├── raw/                # Source-of-truth input data                 
+  │    └── metros.csv     # (CSV, sampled govt files) 
   ├── ingest/             # SQL ingestion / transformation scripts 
   │    ├── ingest_dim_metro_full.sql 
-  │    └── ... 
-  │ 
+  │    └── ...
   ├── dumps/              # Generated query outputs (ignored by git) 
   │ 
   ├── rebuild.sql         # file to populate database
