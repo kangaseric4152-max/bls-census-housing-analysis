@@ -56,7 +56,7 @@ SELECT
     Area,
     Title
 FROM read_csv_auto('data/raw/metros.csv', header=true);
-
+```
 All ingestion scripts are designed to be run from the repository root.
 
 
