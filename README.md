@@ -71,6 +71,7 @@ df = load_cbsa_df('2025','01')          # load cleaned CSV as a DataFrame
 ```
 
 **Repro run (quick)**
+This project builds its analytical database via poetry run build-data, which ingests raw public data and materializes a DuckDB database locally. No prebuilt artifacts are required.
 
 1) Create the environment (Poetry):
 
@@ -87,13 +88,13 @@ poetry run build-data
 - Headless (execute the notebook end-to-end):
 
 ```bash
-poetry run jupyter nbconvert --to notebook --execute scripts/housing.ipynb --ExecutePreprocessor.timeout=600
+poetry run python -m nbconvert   --to notebook   --execute scripts/housing.ipynb   --ExecutePreprocessor.timeout=600
 ```
 
 3) Quick script alternative (fetch and convert one month):
 
 ```bash
-poetry run python3 -c "from bls_housing.census_cache import fetch_cbsa_csv; print(fetch_cbsa_csv('2025','01'))"
+poetry run python -c "from bls_housing.census_cache import fetch_cbsa_csv; print(fetch_cbsa_csv('2025','01'))"
 ```
 
 The repro steps have been tested on a clean Linux environment.
