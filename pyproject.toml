@@ -1,7 +1,7 @@
 [project]
 name = "bls_housing"
 version = "1.3.0"
-description = "A minimal Python jupyter notebook project template using Poetry, and mypy."
+description = "Lightweight Python utilities and notebooks for fetching, caching, and analyzing CBSA-level wage and housing supply data from BLS QCEW and Census BPS."
 authors = [
 	{ name = "Eric Kangas", email = "kangas.eric4152@gmail.com" }
 ]
@@ -15,11 +15,12 @@ dependencies = [
     "jupyter (>=1.1.1,<2.0.0)",
     "nbconvert (>=7.16.6,<8.0.0)",
     "matplotlib (>=3.10.8,<4.0.0)",
-    "duckdb (>=1.4.3,<2.0.0)",
+    "duckdb (>=1.4.3,<1.5.0)",
     "nbstripout (>=0.9.0,<0.10.0)",
     "nbdime (>=4.0.3,<5.0.0)"
 ]
-
+[project.scripts]
+build-data = "bls_housing.build_data:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -31,13 +32,4 @@ dev = [
     "ipykernel (>=7.1.0,<8.0.0)"
 ]
 
-[tool.poetry]
-packages = [{ include = "bls_housing", from = "src" }]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-xlrd = "^2.0.1"
-
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.11"
 

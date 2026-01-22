@@ -58,6 +58,7 @@ by typing
 Make sure you're in the project directory and type
 ```bash
 poetry install
+poetry run build-data
 ```
 
 
@@ -77,6 +78,7 @@ Note: if you don't have poetry installed, instructions are in the Getting Starte
 
 ```bash
 poetry install
+poetry run build-data
 ```
 
 2) Run the notebook (interactive) or execute it headless:
