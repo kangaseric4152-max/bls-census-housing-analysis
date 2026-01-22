@@ -20,8 +20,17 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-data/
+# DuckDB artifacts
+data/*.duckdb
+data/**/*.duckdb
 
-docs/*.Identifier
+# Generated dumps
+data/dumps/
+data/**/*.json
+
+# cache
+data/cache/
+
+*.Identifier
 
 *.log
