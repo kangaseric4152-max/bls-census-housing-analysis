@@ -1,6 +1,6 @@
 CREATE OR REPLACE TABLE dim_metro_full AS
 SELECT
-  CAST(Code AS INTEGER) AS Code,
+  CAST(Code AS BIGINT) AS Code,
   Area,
   Title
 FROM read_csv_auto('data/raw/metros.csv', header=true);
