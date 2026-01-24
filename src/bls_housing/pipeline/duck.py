@@ -5,12 +5,8 @@ import duckdb
 import pandas as pd
 
 DBPATH = Path("../data/analysis.duckdb") 
-def get_con(dbpath: str | Path = DBPATH):
+def get_analysis_db_connection(dbpath: str | Path = DBPATH):
     return duckdb.connect(Path(dbpath))
-
-
-def close_con(con: duckdb.DuckDBPyConnection):
-    con.close()
 
 
 def list_metros(con: duckdb.DuckDBPyConnection, codes: List[int]) -> pd.DataFrame:

@@ -16,12 +16,22 @@ from typing import Optional
 
 import pandas as pd
 import requests
+import logging
 
 
 # Repository root (two levels up from this file: src/bls_housing -> src -> repo root)
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CACHE_DIR = REPO_ROOT / "data" / "cache"
+CACHE_DIR = REPO_ROOT / "data" / "cache" / "bls"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+
+# w = 'overwrite' mode for each run
+logging.basicConfig(filename=f"{REPO_ROOT / 'logs' / 'qcew_cache.log'}", 
+                    filemode='w', 
+                    level=logging.DEBUG)
+logger = logging.getLogger()
+
 
 def qcew_get_area_url(year: str, qtr: str, area: str) -> str:
     """Return the QCEW area CSV download URL for given year, quarter, and area code.
@@ -70,8 +80,10 @@ def fetch_area_csv(
     try:
         resp = requests.get(url, timeout=timeout)
     except requests.RequestException as e:
+        logger.debug(f"Error downloading {url}: {e}")
         raise RuntimeError(f"Failed to download {url}: {e}") from e
     if resp.status_code >= 400:
+        logger.debug(f"HTTP {resp.status_code} downloading {url}: {resp.text}")
         raise RuntimeError(f"Failed to download {url}: HTTP {resp.status_code}")
 
     out_path = cache_dir_path / _cache_filename(area, year, qtr)

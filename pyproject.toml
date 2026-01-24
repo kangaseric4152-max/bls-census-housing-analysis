@@ -17,7 +17,8 @@ dependencies = [
     "matplotlib (>=3.10.8,<4.0.0)",
     "duckdb (>=1.4.3,<1.5.0)",
     "nbstripout (>=0.9.0,<0.10.0)",
-    "nbdime (>=4.0.3,<5.0.0)"
+    "nbdime (>=4.0.3,<5.0.0)",
+    "pyarrow (>=23.0.0,<24.0.0)"
 ]
 [project.scripts]
 build-data = "bls_housing.build_data:main"

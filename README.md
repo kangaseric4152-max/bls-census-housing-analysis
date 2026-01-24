@@ -116,7 +116,10 @@ Tips
 - To refresh a cached file, pass `force_download=True` to the cache helpers in `src/bls_housing/*_cache.py`.
 - Keep large caches out of Git; consider adding `data/cache/` to `.gitignore` or using git-lfs for larger artifacts.
 
+
+NOTE: Some MSAs may not have published QCEW open-data area slices in the api. 
+
 ---
-Updated: 2026-01-15
+Updated: 2026-01-23
 
 
