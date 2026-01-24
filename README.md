@@ -103,7 +103,7 @@ Where cache files land
 
 - Census XLS downloads: `data/cache/census/xls/` (raw `.xls` files)
 - Cleaned Census CSVs: `data/cache/census/csv/` (files named like `CBSA_YYYY_MM.csv`)
-- BLS QCEW area CSV cache: `data/cache/` (files named like `AREA_YYYY_Q.csv`, e.g. `C4266_2025_1.csv`)
+- BLS QCEW area CSV cache: `data/cache/bls` (files named like `AREA_YYYY_Q.csv`, e.g. `C4266_2025_1.csv`)
 
 What the outputs are
 
