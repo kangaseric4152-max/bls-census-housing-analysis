@@ -14,6 +14,10 @@ from .census_txt_parser import (
     convert_census_txt_to_data_frame
 )
 
+from .pipeline.wages import (
+    build_annual_wages
+)
+
 __all__ = [
     "qcew_get_area_url",
     "fetch_area_csv",
@@ -22,4 +26,5 @@ __all__ = [
     "get_census_cbsa_url",
     "fetch_cbsa_xls",
     "convert_census_txt_to_data_frame",
+    "build_annual_wages"
 ]
