@@ -12,7 +12,7 @@ from collections import defaultdict
 
 def build_annual_permits(metros, 
                          years: List[int], 
-                         quarters = [1, 2, 3, 4]) -> pd.DataFrame:
+                         quarters = [1, 2, 3, 4]) -> tuple[pd.DataFrame, pd.DataFrame]:
     total_permits = defaultdict(int)
     data_list = []
 
@@ -41,4 +41,4 @@ def build_annual_permits(metros,
     # Calculate annual total permits and percentage change
     annual_permits = permits_df.groupby(["Area", "Code", "Year"])["Total_Permits"].sum().reset_index()
     annual_permits["Change_Permit"] = annual_permits.groupby("Code")["Total_Permits"].pct_change() * 100
-    return annual_permits
+    return (permits_df, annual_permits)

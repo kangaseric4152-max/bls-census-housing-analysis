@@ -40,7 +40,7 @@ def adjust_inflation(row):
 
 def build_annual_wages(metros: pd.DataFrame, 
                     years: List[int], 
-                    quarters=[1,2,3,4]) -> pd.DataFrame:
+                    quarters=[1,2,3,4]) ->  tuple[pd.DataFrame, pd.DataFrame]:
     data_list = []
     #metros = list_metros(con, area_codes)
     for m in metros.itertuples(index=False):
@@ -72,4 +72,4 @@ def build_annual_wages(metros: pd.DataFrame,
     # now calculate the growth rate using the adjusted wages
     annual_wages_df['Change_Real_Wage'] = annual_wages_df.groupby("Area")['Real_Total_Wages'].pct_change() * 100
     #print(annual_wages_df.head(15))
-    return annual_wages_df
+    return (wages_df, annual_wages_df)
