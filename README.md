@@ -118,8 +118,8 @@ Tips
 
 
 NOTE: Some MSAs may not have published QCEW open-data area slices in the api. 
-
+NOTE: Small metros with low base-year permit counts exhibit unstable cumulative indices and are excluded from comparative analysis.
 ---
-Updated: 2026-01-23
+Updated: 2026-01-24
 
 

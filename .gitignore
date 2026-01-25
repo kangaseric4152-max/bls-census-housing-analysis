@@ -19,6 +19,7 @@ htmlcov/
 # OS junk
 .DS_Store
 Thumbs.db
+*.Identifier
 
 # DuckDB artifacts
 data/*.duckdb
@@ -31,6 +32,5 @@ data/**/*.json
 # cache
 data/cache/
 
-*.Identifier
-
 *.log
+*.bak

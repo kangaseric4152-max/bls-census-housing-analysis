@@ -22,6 +22,8 @@ def main():
     root = Path(__file__).resolve().parents[2]  # repo root
     db_path = root / "data" / "analysis.duckdb"
     rebuild_sql = root / "data" / "rebuild.sql"
+    LOG_DIR = root / "logs"
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
 
     print("Building DuckDB database...")
     con = duckdb.connect(str(db_path))

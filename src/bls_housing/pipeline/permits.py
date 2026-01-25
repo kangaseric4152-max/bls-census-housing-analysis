@@ -8,7 +8,14 @@ from bls_housing.helper import QUARTER_TO_MONTH
 from typing import cast
 from typing import List
 import pandas as pd
+
 from collections import defaultdict
+
+
+def safe_scalar(df: pd.DataFrame, col: str):
+    if df.empty:
+        return None
+    return df[col].iloc[0]
 
 def build_annual_permits(metros, 
                          years: List[int], 
@@ -25,7 +32,11 @@ def build_annual_permits(metros,
                     df_current_area = df[df['CBSA'] == m.Code]  # filter for CBSA
                 
                 # get Total_Permits for CBSA
-                    total_permits_current_month = df_current_area['Total'].iloc[0]
+                    if df_current_area.empty:
+                        print(
+                            f"Missing permits: Code={m.Code}, Year={year}, Month={mon}"
+                        )
+                    total_permits_current_month = safe_scalar(df_current_area, 'Total')
 
                     data_list.append({
                     "Area": m.Area,
