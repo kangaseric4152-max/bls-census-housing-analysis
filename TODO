@@ -1,0 +1,5 @@
+- Add INFO/WARN logging around cache hits, missing keys, and metric anomalies
+- Convert inf zoning pressure → NULL with warning
+- Emit run summary (metros, years, rows written)
+- Run on more metros, check chart outputs for data issues
+- TODO: Add GeoPandas-based lookup to map ZIP code → nearest CBSA (containment first, distance fallback).
