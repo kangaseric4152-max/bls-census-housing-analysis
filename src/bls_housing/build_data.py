@@ -1,6 +1,8 @@
 from pathlib import Path
 import duckdb
 import re
+from bls_housing.logging_config import configure_logging
+
 
 INCLUDE_RE = re.compile(r"^\s*--\s*include:\s*(.+?)\s*$")
 
@@ -19,6 +21,8 @@ def expand_sql(sql_path: Path, root: Path) -> str:
     return "\n".join(lines) + "\n"
 
 def main():
+    configure_logging(level="INFO")
+    
     root = Path(__file__).resolve().parents[2]  # repo root
     db_path = root / "data" / "analysis.duckdb"
     rebuild_sql = root / "data" / "rebuild.sql"

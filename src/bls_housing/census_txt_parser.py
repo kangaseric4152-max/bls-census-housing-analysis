@@ -8,19 +8,16 @@
 from pathlib import Path
 import pandas as pd
 import logging
+from bls_housing.logging_config import configure_logging
 
-# w = 'overwrite' mode for each run
-logging.basicConfig(filename="parser.log", 
-                    filemode='w', 
-                    level=logging.DEBUG)
-logger = logging.getLogger()
-
+configure_logging(level="INFO")
+logger = logging.getLogger(__name__)
 
 def _parse_census_stream(file_path: Path | str):
     code_start=49
     name_start=10
 
-    logger.debug(f"Starting to parse census TXT format file: {file_path}")
+    logger.info(f"Starting to parse census TXT format file: {file_path}")
     # Define exact slice positions (based on your screenshot)
     # You need to confirm the exact start index of the "GA" on line 2
     SLICE_CODE = slice(0, 9)
@@ -28,7 +25,7 @@ def _parse_census_stream(file_path: Path | str):
     SLICE_NAME_MULTI_LINE = slice(0, code_start) # For continuation lines
     SLICE_DATA = slice(code_start, None) # The rest of the line
 
-    logger.debug(f"Parsing file: {file_path}")
+    logger.info(f"Parsing file: {file_path}")
     
     with open(file_path, 'r', encoding='latin1') as f:
         buffer_code = None
@@ -98,7 +95,7 @@ def _parse_census_stream(file_path: Path | str):
                 else:
                     # Orphaned continuation line? (Shouldn't happen)
                     continue
-    logger.debug("Finished parsing file.")
+    logger.info("Finished parsing file.")
 
 def convert_parsed_record(record):
     """
@@ -149,7 +146,7 @@ def convert_census_txt_to_csv(txt_path: Path, csv_path: Path) -> None:
 
     df = pd.DataFrame(records)
     df.to_csv(csv_path, index=False)
-    logger.debug(f"Converted TXT file {txt_path} to CSV file {csv_path}")
+    logger.info(f"Converted TXT file {txt_path} to CSV file {csv_path}")
 
 
 def convert_census_txt_to_data_frame(txt_path: Path) -> 'pd.DataFrame':
