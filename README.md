@@ -38,6 +38,7 @@ Notes about the data
 - CBSA monthly XLS files include two groups of columns — current month and year-to-date — which the cleaning logic preserves by appending `_year_to_date` to duplicate headings.
 - BLS QCEW area CSVs include aggregation codes — e.g. `agglvl_code == 40` identifies MSA totals. The notebook demonstrates filtering by aggregation codes and summing quarterly/annual totals.
 - The BPS monthly files are preliminary on release and later revised. The project caches whatever the downloaded file contains; re-run with `force_download=True` in the cache helpers to refresh.
+- Derived data, Parquet outputs included for convenience; pipeline can regenerate from raw sources.”
 
 Getting started
 1. Install dependencies (Poetry recommended):
