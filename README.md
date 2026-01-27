@@ -94,6 +94,8 @@ Build the data:
 poetry install
 poetry run build-data
 ```
+Open housing.ipynb and run the cells to generate analysis tables and charts.
+
 ---
 
 ## Outputs
