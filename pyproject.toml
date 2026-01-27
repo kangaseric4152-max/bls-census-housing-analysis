@@ -1,6 +1,6 @@
 [project]
 name = "bls_housing"
-version = "1.5.0"
+version = "1.5.1"
 description = "Lightweight Python utilities and notebooks for fetching, caching, and analyzing CBSA-level wage and housing supply data from BLS QCEW and Census BPS."
 authors = [
 	{ name = "Eric Kangas", email = "kangas.eric4152@gmail.com" }

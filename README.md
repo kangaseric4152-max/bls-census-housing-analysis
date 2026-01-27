@@ -52,7 +52,7 @@ data/
   cache/           raw public data (BLS, Census)
   derived/         parquet outputs
   rebuild.sql      schema initialization
-  TODO          known data caveats & anomalies
+  TODO             known data caveats & anomalies
 
 pyproject.toml
 ```
