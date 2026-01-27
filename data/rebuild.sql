@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS wages_metrics (
     Year BIGINT,
     Quarter BIGINT,
     Total_Wages BIGINT
-)
+);
 
 CREATE TABLE IF NOT EXISTS permits_metrics (
     Area VARCHAR,
