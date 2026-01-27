@@ -90,10 +90,10 @@ Prerequisites:
 - Poetry
 
 Build the data:
-
+```bash
 poetry install
 poetry run build-data
-
+```
 ---
 
 ## Outputs
