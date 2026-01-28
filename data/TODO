@@ -14,3 +14,22 @@ SELECT *
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 LOOK at generated charts and see if methodology needs work
+
+TODO data check before chart / derived metrics generation
+Data availability notes:
+
+The following CBSAs have years with zero reported building permits in BPS data,
+which results in Permit_Index = 0 and Zoning_Pressure = INF for those years.
+
+These cases are rare (3 / 90 metros) and appear to be structural data gaps
+rather than processing errors.
+
+Affected metros:
+- 13780  Binghamton, NY
+- 25260  Hanford–Corcoran, CA
+- 43300  Sherman–Denison, TX
+
+Current handling:
+- Rows retained in raw tables for transparency
+
+See diagnostic query in SQL notes for detection logic.

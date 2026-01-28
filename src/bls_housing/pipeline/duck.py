@@ -80,7 +80,7 @@ def update_db(con: duckdb.DuckDBPyConnection,
             USING   permits_metrics_stage s
             WHERE   t.Code = s.Code 
                     AND t.Year = s.Year
-                    AND t.Quarter = s.Quarter;
+                    AND t.Quarter = s.Quarter 
                     AND t.Month = s.Month;
             INSERT INTO permits_metrics (
                 Area, Code, Year, Quarter, Month, Total_Permits
