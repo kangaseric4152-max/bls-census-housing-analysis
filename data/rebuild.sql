@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS permits_metrics (
     Quarter BIGINT,
     Month BIGINT,
     Total_Permits BIGINT
-)
+);
 
 -- sanity check helpers (run manually or from build script)
 -- should always return 0 rows
