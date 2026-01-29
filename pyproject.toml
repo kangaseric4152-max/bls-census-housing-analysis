@@ -22,6 +22,7 @@ dependencies = [
 ]
 [project.scripts]
 build-data = "bls_housing.build_data:main"
+build-parquet-lake = "bls_housing.pipeline.parquetify:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

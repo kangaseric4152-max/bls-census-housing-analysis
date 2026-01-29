@@ -3,3 +3,4 @@
 - Emit run summary (metros, years, rows written)
 - Run on more metros, check chart outputs for data issues
 - TODO: Add GeoPandas-based lookup to map ZIP code → nearest CBSA (containment first, distance fallback).
+- TODO: hook up the rest of the process to parquet lake instead of csv

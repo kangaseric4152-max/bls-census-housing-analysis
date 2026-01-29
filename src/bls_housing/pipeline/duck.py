@@ -4,7 +4,9 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 
-DBPATH = Path("../data/analysis.duckdb") 
+PROJECT_ROOT = Path(__file__).parents[3].resolve()  # adjust to your layout
+DBPATH = PROJECT_ROOT / "data" / "analysis.duckdb" 
+
 def get_analysis_db_connection(dbpath: str | Path = DBPATH):
     return duckdb.connect(Path(dbpath))
 

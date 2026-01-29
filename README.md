@@ -40,7 +40,7 @@ These metrics are designed to surface structural imbalances, not to explain caus
 ## Repository Layout
 ```bash
 src/bls_housing/
-  pipeline/        data build logic (wages, permits, cumulative metrics)
+  pipeline/        data build logic (wages, permits, cumulative metrics, parquet lake)
   duck.py          DuckDB helpers and database writes
   logging_config.py
   helpers.py       shared constants and utilities
@@ -51,6 +51,7 @@ scripts/
 data/
   cache/           raw public data (BLS, Census)
   derived/         parquet outputs
+  lake/            parquet lake files in hive folder structure
   rebuild.sql      schema initialization
   TODO             known data caveats & anomalies
 
@@ -96,6 +97,11 @@ poetry run build-data
 ```
 Open housing.ipynb and run the cells to generate analysis tables and charts.
 
+After running the notebook, you can process the raw csv to a parquet data lake form:
+```bash
+poetry run build-parquet-lake
+```
+
 ---
 
 ## Outputs
@@ -119,5 +125,6 @@ Open housing.ipynb and run the cells to generate analysis tables and charts.
 - Reorganized README into a clear narrative
 - Removed exploratory or tutorial-style language
 - Clarified scope and limitations
+- Added parquet lake and poetry run script
 
-Last updated: 2026-01-27
+Last updated: 2026-01-28
