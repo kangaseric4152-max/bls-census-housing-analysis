@@ -109,6 +109,38 @@ poetry run build-parquet-lake
 - DuckDB analytical tables
 - Parquet files under data/derived
 - Line charts illustrating annual and cumulative housing pressure
+- Parquet lake under data/lake
+
+Optional: Object Storage (S3-compatible)
+The Parquet lake can be published to S3-compatible object storage (e.g. MinIO or AWS S3) and queried directly from DuckDB using Hive-style partitioning.
+
+From there you can query S3:
+```sql
+SELECT
+  cbsa_code,
+  year,
+  quarter,
+  COUNT(*) AS rows
+FROM read_parquet(
+  's3://housing-lake/bls/**/**/*.parquet',
+  hive_partitioning=1
+)
+GROUP BY cbsa_code, year, quarter;
+100% ▕██████████████████████████████████████▏ (00:00:04.45 elapsed)
+┌───────────┬───────┬─────────┬───────┐
+│ cbsa_code │ year  │ quarter │ rows  │
+│   int64   │ int64 │  int64  │ int64 │
+├───────────┼───────┼─────────┼───────┤
+│     48660 │  2024 │       4 │  1274 │
+│     48660 │  2024 │       3 │  1274 │
+│     48660 │  2024 │       2 │  1274 │
+│       ·   │    ·  │       · │    ·  │
+│       ·   │    ·  │       · │    ·  │
+│       ·   │    ·  │       · │    ·  │
+├───────────┴───────┴─────────┴───────┤
+│ 4046 rows (40 shown)      4 columns │
+└─────────────────────────────────────┘
+```
 
 ---
 
