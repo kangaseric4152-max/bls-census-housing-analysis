@@ -23,6 +23,12 @@ This is not a predictive model. The goal is transparency, reproducibility, and m
 
 ---
 
+## Why This Project Exists
+
+This project began as an exploration of how publicly available labor (BLS) and housing (permit) data can be combined to understand structural housing pressure and inform zoning and policy discussions at the metro level.
+
+---
+
 ## What This Project Computes
 
 Two complementary metrics are used to explore housing supply pressure relative to labor growth:
