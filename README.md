@@ -79,6 +79,18 @@ Census — Building Permits Survey (BPS)
 - Published as Excel since November 2019
 - Earlier data used fixed-width text formats
 
+Notes about the data:
+- This project analyzes Metropolitan Statistical Areas (MSAs) only.
+While QCEW provides data for both MSAs and Micropolitan Statistical Areas (MicroSAs), MicroSAs are excluded to focus analysis on large urban labor and housing markets.
+- Queryable data currently is derived from a pdf in the docs folder, but it's not exhaustive. A more comprehensive list of MSAs is in area-titles-csv.csv from https://www.bls.gov/cew/classifications/areas/qcew-area-titles.htm, but that needs to be matched with census reporting data.
+- Replaced earlier PDF-based CBSA reference with QCEW area CSV to ensure current MSA/MicroSA classification accuracy.
+- Area Classification Notes:
+Metropolitan area definitions are sourced from the BLS QCEW area reference CSV.
+During validation, three areas originally included via an older PDF reference were removed after confirmation that they were reclassified from Metropolitan Statistical Areas (MSAs) to Micropolitan Statistical Areas following the 2020 Census:
+Carbondale–Marion, IL
+Pine Bluff, AR
+East Stroudsburg, PA.
+These reclassifications were announced by the Office of Management and Budget (OMB) in July 2023 and implemented in 2025. The dimension table reflects current MSA classifications only.
 ---
 
 ## Why Caching Exists
