@@ -1,0 +1,103 @@
+-- Context: Load CBSA population 2021–2024 and rebuild cumulative metrics
+-- Date: 2026-02-01
+
+create table census_2024_raw as select * from read_csv_auto('data/raw/cbsa-est2024-alldata.utf8.csv');
+select * from census_2024_raw;
+create or replace table cbsa_population as
+select
+  cbsa as cbsa_code,
+  cast(regexp_extract(year_col, 'POPESTIMATE(\d{4})', 1) as int) as year,
+  population
+from (
+  select *
+  from census_2020_raw
+  where lsad = 'Metropolitan Statistical Area'
+    and mdiv is null
+) src
+unpivot (
+  population for year_col in (
+    POPESTIMATE2010,
+    POPESTIMATE2011,
+    POPESTIMATE2012,
+    POPESTIMATE2013,
+    POPESTIMATE2014,
+    POPESTIMATE2015,
+    POPESTIMATE2016,
+    POPESTIMATE2017,
+    POPESTIMATE2018,
+    POPESTIMATE2019,
+    POPESTIMATE2020
+  )
+);
+select * from cbsa_population;
+select distinct year from cbsa_population;
+create or replace table cbsa_population_2024 as
+select
+  cbsa as cbsa_code,
+  cast(regexp_extract(year_col, 'POPESTIMATE(\d{4})', 1) as int) as year,
+  population
+from (
+  select *
+  from census_2024_raw
+  where lsad = 'Metropolitan Statistical Area'
+    and mdiv is null
+) src
+unpivot (
+  population for year_col in (
+    POPESTIMATE2010,
+    POPESTIMATE2011,
+    POPESTIMATE2012,
+    POPESTIMATE2013,
+    POPESTIMATE2014,
+    POPESTIMATE2015,
+    POPESTIMATE2016,
+    POPESTIMATE2017,
+    POPESTIMATE2018,
+    POPESTIMATE2019,
+    POPESTIMATE2020
+  )
+);
+select COLUMN('POPESTIMATE\d{4}') from census_2024_raw;
+select COLUMNS('POPESTIMATE\d{4}') from census_2024_raw;
+create or replace table cbsa_population_2024 as
+select
+  cbsa as cbsa_code,
+  cast(regexp_extract(year_col, 'POPESTIMATE(\d{4})', 1) as int) as year,
+  population
+from (
+  select *
+  from census_2024_raw
+  where lsad = 'Metropolitan Statistical Area'
+    and mdiv is null
+) src
+unpivot (
+  population for year_col in (
+    --POPESTIMATE2010,
+    --POPESTIMATE2011,
+    --POPESTIMATE2012,
+    --POPESTIMATE2013,
+    --POPESTIMATE2014,
+    --POPESTIMATE2015,
+    POPESTIMATE2021,
+    POPESTIMATE2022,
+    POPESTIMATE2023,
+    POPESTIMATE2024
+    --POPESTIMATE2020
+  )
+);
+select * from cbsa_population_2024
+;
+select * from cbsa_population UNION select * from cbsa_population_2024;
+select count(*) from cbsa_population;
+select count(*) from cbsa_population_2024;
+select count(*) from cbsa_population UNION select * from cbsa_population_2024;
+select count(*) from (select * from cbsa_population UNION select * from cbsa_population_2024);
+insert into cbsa_population select * from cbsa_population_2024;
+select count(*) from cbsa_population_2024;
+select count(*) from cbsa_population;
+SELECT
+  min(year) AS min_year,
+  max(year) AS max_year,
+  count(DISTINCT year) AS years,
+  count(DISTINCT cbsa_code) AS metros
+FROM cbsa_population;
