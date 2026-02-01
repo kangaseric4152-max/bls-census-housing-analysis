@@ -1,0 +1,40 @@
+digraph housing_pipeline {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+
+  // Sources
+  qcew_src [label="BLS QCEW"];
+  permits_src [label="Census Permits"];
+  pop_src [label="Census CBSA Population"];
+
+  // Raw / staging
+  qcew_raw;
+  permits_raw;
+  cbsa_population;
+
+  // Derived
+  annual_wages;
+  annual_permits;
+
+  // Analytical
+  v_inputs;
+  v_cumulative_metrics;
+
+  // Outputs
+  charts [label="Charts / Notebook"];
+
+  // Edges
+  qcew_src -> qcew_raw;
+  permits_src -> permits_raw;
+  pop_src -> cbsa_population;
+
+  qcew_raw -> annual_wages;
+  permits_raw -> annual_permits;
+
+  annual_wages -> v_inputs;
+  annual_permits -> v_inputs;
+  cbsa_population -> v_inputs;
+
+  v_inputs -> v_cumulative_metrics;
+  v_cumulative_metrics -> charts;
+}
