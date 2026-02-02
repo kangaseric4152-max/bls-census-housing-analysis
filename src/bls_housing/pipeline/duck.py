@@ -102,6 +102,62 @@ CREATE TABLE IF NOT EXISTS build_meta (
 """)
 
 
+def build_permits_metrics(con: duckdb.DuckDBPyConnection, metros: pd.DataFrame, years: list[int] = [y for y in range(2014, 2024)]) -> pd.DataFrame:
+    years = sorted(set(years))
+    assert len(years) > 1
+
+    return con.execute("""
+        SELECT
+        i.area,
+        i.code,
+        cast(i.year AS INT) AS year,
+        i.permits_per_1k,
+        i.permits_per_1k - lag(i.permits_per_1k) over (partition by i.code order by i.year) AS delta_permits_per_1k
+        FROM inputs_percap i
+        JOIN metros USING (code) 
+        WHERE i.year IN (select * from UNNEST(?))
+        ORDER BY code, year;
+  """, [years]).df()
+
+
+def build_cumulative_metrics(con: duckdb.DuckDBPyConnection, metros: pd.DataFrame, years: list[int] = [y for y in range(2014, 2024)], base_year: int = 2015) -> pd.DataFrame:
+    years = sorted(set(years))
+    assert len(years) > 1
+    
+    q = """
+        WITH params AS (SELECT CAST(? AS INTEGER) AS base_year),
+
+        filtered AS (
+        SELECT i.*
+        FROM inputs_percap i, params p
+        JOIN metros m on m.code = i.code
+        WHERE i.year >= p.base_year
+        ),
+
+        base AS (
+        SELECT
+            code,
+            max(real_total_wages) FILTER (WHERE year = (SELECT base_year FROM params)) AS base_wage,
+            max(total_permits)    FILTER (WHERE year = (SELECT base_year FROM params)) AS base_permits
+        FROM filtered
+        GROUP BY code
+        )
+
+        SELECT
+        f.*,
+        b.base_wage,
+        b.base_permits,
+        f.real_total_wages / nullif(b.base_wage, 0)      AS cumul_wage_index,
+        f.total_permits    / nullif(b.base_permits, 0)  AS cumul_permit_index,
+        (f.real_total_wages / nullif(b.base_wage, 0))
+            / nullif((f.total_permits / nullif(b.base_permits, 0)), 0) AS structural_gap
+        FROM filtered f
+        JOIN base b USING (code)
+        WHERE f.year IN (SELECT * FROM unnest(?))
+        ORDER BY code, year;
+        """
+    return con.execute(q, [base_year, years]).df()
+
 # def list_metros_2(con, title_like: str | None = None):
 #     if title_like:
 #         return con.sql("""

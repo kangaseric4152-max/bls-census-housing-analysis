@@ -19,7 +19,7 @@ def build_annual_metrics(annual_wages_df, annual_permits) -> pd.DataFrame:
     final_df['Zoning_Pressure'] = final_df['Wage_Index'] / final_df['Permit_Index']
     return final_df
 
-
+# TODO delete
 def build_cumulative_metrics(annual_wages_df: pd.DataFrame,
                              annual_permits: pd.DataFrame,
                              base_year: int) -> pd.DataFrame:

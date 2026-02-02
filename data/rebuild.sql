@@ -1,6 +1,8 @@
 -- rebuild.sql
 
 -- include: data/ingest/ingest_dim_metro_full.sql
+-- include: data/ingest/ingest_cbsa_population.sql
+-- include: data/ingest/ingest_inputs_percap.sql
 
 DROP TABLE IF EXISTS annual_metrics_stage;
 DROP TABLE IF EXISTS cumulative_metrics_stage;

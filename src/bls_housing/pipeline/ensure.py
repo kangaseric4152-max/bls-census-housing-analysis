@@ -104,6 +104,10 @@ def ensure_annual_wages(
         & df_updated["Year"].astype("int64").isin([int(y) for y in years])
     ].copy()
 
+    expected_rows = len(metros) * len(years)
+    actual_rows = len(df_subset.drop_duplicates(subset=["Code","Year"]))
+    assert actual_rows == expected_rows, (expected_rows, actual_rows)
+
     return EnsureResult((wages_df, df_subset), missing_keys=missing)
 
 
@@ -141,5 +145,10 @@ def ensure_annual_permits(
         df_updated["Code"].astype("int64").isin(codes)
         & df_updated["Year"].astype("int64").isin([int(y) for y in years])
     ].copy()
+
+    expected_rows = len(metros) * len(years)
+    actual_rows = len(df_subset.drop_duplicates(subset=["Code","Year"]))
+    assert actual_rows == expected_rows, (expected_rows, actual_rows)
+
 
     return EnsureResult((permits_df, df_subset), missing_keys=missing)

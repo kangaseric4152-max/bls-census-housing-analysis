@@ -33,6 +33,8 @@ data/**/*.json
 data/cache/
 data/lake/
 
+outputs/ 
+
 *.log
 *.bak
 *.wal
