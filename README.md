@@ -1,138 +1,158 @@
 # BLS & Census Housing Analysis
-_Reproducible data pipeline and exploratory analysis using U.S. public datasets_
+_Reproducible data pipeline and analytical reference using U.S. public datasets_
 
 ---
 
 ## Overview
 
-This repository provides a lightweight, reproducible pipeline for ingesting, caching, and analyzing
-area-level housing permits and wage data from U.S. public sources:
+This repository provides a reproducible data pipeline and analysis workflow for exploring
+metro‑level housing supply relative to labor growth using U.S. public datasets:
 
-- Bureau of Labor Statistics (BLS) — Quarterly Census of Employment and Wages (QCEW)
-- U.S. Census Bureau — Building Permits Survey (BPS)
+- **Bureau of Labor Statistics (BLS)** — Quarterly Census of Employment and Wages (QCEW)
+- **U.S. Census Bureau** — Building Permits Survey (BPS) and Population Estimates
 
-The project focuses on CBSA-level (metro area) trends and demonstrates how to:
+The project is designed as a **reference implementation** for:
+- Public‑data ingestion and normalization
+- Parquet‑based analytical workflows
+- SQL‑first metric derivation using DuckDB
+- Transparent, policy‑relevant housing indicators
 
-- Ingest heterogeneous public datasets
-- Normalize and cache raw files for repeatable analysis
-- Build derived analytical tables in DuckDB
-- Compute simple, interpretable housing pressure metrics
-- Explore results interactively in a Jupyter notebook
-
-This is not a predictive model. The goal is transparency, reproducibility, and method clarity.
+This is **not** a predictive model. The focus is clarity, reproducibility, and extensibility.
 
 ---
 
 ## Why This Project Exists
 
-This project began as an exploration of how publicly available labor (BLS) and housing (permit) data can be combined to understand structural housing pressure and inform zoning and policy discussions at the metro level.
+This project began with a practical question:
+
+> How can publicly available labor and housing data be combined to surface structural housing pressure at the metropolitan level?
+
+The resulting pipeline demonstrates how government data — often fragmented, inconsistently formatted, and slow to access — can be transformed into a stable analytical substrate suitable for policy discussion, research, and exploratory analysis.
 
 ---
 
 ## What This Project Computes
 
-Two complementary metrics are used to explore housing supply pressure relative to labor growth:
+Two complementary metrics are used:
 
-1. Annual Zoning Pressure Index  
-   Ratio of year-over-year wage growth to year-over-year permit growth.
+### 1. Annual Housing Pressure (Per‑Capita)
+Year‑over‑year change in housing permits per 1,000 residents.
 
-2. Cumulative Housing Deficit Index  
-   Relative change in wages vs. permits indexed to a base year.
+This highlights short‑term supply volatility and permitting responsiveness.
 
-These metrics are designed to surface structural imbalances, not to explain causality or pricing.
+### 2. Cumulative Structural Gap Index
+A cumulative ratio of wage growth to housing permit growth, indexed to a base year.
+
+If labor demand grows faster than housing supply over time, the index rises — indicating structural pressure rather than short‑term fluctuation.
+
+These metrics **surface imbalance**; they do not attempt to explain causality or pricing.
+
+---
+
+## Data Philosophy
+
+This repository follows a **derived‑data‑first** approach:
+
+- **Committed Parquet files** represent stable, reproducible analytical inputs
+- Notebooks run **without live API calls by default**
+- Raw API ingestion is optional and explicitly invoked
+
+This avoids brittle dependencies on government endpoints while preserving a clear path for extending coverage.
 
 ---
 
 ## Repository Layout
+
 ```bash
 src/bls_housing/
-  pipeline/        data build logic (wages, permits, cumulative metrics, parquet lake)
-  duck.py          DuckDB helpers and database writes
-  logging_config.py
-  helpers.py       shared constants and utilities
+  pipeline/        SQL + Python pipeline logic
+  duck.py          DuckDB helpers and execution utilities
+  helpers.py       Shared constants and utilities
 
 scripts/
-  housing.ipynb    main analysis notebook
+  housing.ipynb    Main analysis notebook (charts & metrics)
 
 data/
-  cache/           raw public data (BLS, Census)
-  derived/         parquet outputs
-  lake/            parquet lake files in hive folder structure
-  rebuild.sql      schema initialization
-  TODO             known data caveats & anomalies
+  derived/         Committed parquet (authoritative inputs)
+  lake/            Optional parquet lake (Hive‑partitioned)
+  rebuild.sql      DuckDB schema and view definitions
+  TODO             Known data caveats & anomalies
 
 pyproject.toml
 ```
+
 ---
 
 ## Data Sources
 
-BLS — QCEW (Quarterly Census of Employment and Wages)
+### BLS — QCEW
+- Quarterly metro‑level employment and wage totals
+- Accessed via the BLS CEW CSV API
+- Aggregation level: metro totals only (MicroSAs excluded)
 
-- Area-level employment and wage data
-- Accessed via the BLS CEW open CSV API
-- Aggregation level agglvl_code == 40 is used for metro totals
+### Census — Building Permits Survey
+- Monthly CBSA‑level housing permits
+- Aggregated to annual totals during processing
 
-Census — Building Permits Survey (BPS)
+### Census — Population Estimates
+- Annual CBSA population totals
+- Used for per‑capita normalization
+- Stored as a committed derived table
 
-- Monthly CBSA-level building permits
-- Published as Excel since November 2019
-- Earlier data used fixed-width text formats
-
-Notes about the data:
-- This project analyzes Metropolitan Statistical Areas (MSAs) only.
-While QCEW provides data for both MSAs and Micropolitan Statistical Areas (MicroSAs), MicroSAs are excluded to focus analysis on large urban labor and housing markets.
-- Queryable data currently is derived from a pdf in the docs folder, but it's not exhaustive. A more comprehensive list of MSAs is in area-titles-csv.csv from https://www.bls.gov/cew/classifications/areas/qcew-area-titles.htm, but that needs to be matched with census reporting data.
-- Replaced earlier PDF-based CBSA reference with QCEW area CSV to ensure current MSA/MicroSA classification accuracy.
-- Area Classification Notes:
-Metropolitan area definitions are sourced from the BLS QCEW area reference CSV.
-During validation, three areas originally included via an older PDF reference were removed after confirmation that they were reclassified from Metropolitan Statistical Areas (MSAs) to Micropolitan Statistical Areas following the 2020 Census:
-Carbondale–Marion, IL
-Pine Bluff, AR
-East Stroudsburg, PA.
-These reclassifications were announced by the Office of Management and Budget (OMB) in July 2023 and implemented in 2025. The dimension table reflects current MSA classifications only.
 ---
 
-## Why Caching Exists
+## Area Classification Notes
 
-Public data downloads are slow, brittle, and occasionally unavailable.
+- Analysis is limited to **Metropolitan Statistical Areas (MSAs)**
+- Classification is sourced from the official BLS QCEW area reference CSV
+- Earlier PDF‑based references were removed after validation
 
-This project downloads raw files once, converts them to normalized CSV or Parquet, and reuses cached
-data unless explicitly refreshed.
+Three areas were explicitly removed after confirmation they were reclassified from MSAs to Micropolitan Statistical Areas following the 2020 Census:
+- Carbondale–Marion, IL
+- Pine Bluff, AR
+- East Stroudsburg, PA
+
+OMB announced these changes in July 2023; implementation occurred in 2025.
 
 ---
 
 ## Getting Started
 
-Prerequisites:
+### Prerequisites
 - Python 3.10+
 - Poetry
 
-Build the data:
+### Install & Load Derived Data
 ```bash
 poetry install
 poetry run build-data
 ```
-Open housing.ipynb and run the cells to generate analysis tables and charts.
 
-After running the notebook, you can process the raw csv to a parquet data lake form:
+This loads committed Parquet data into DuckDB and creates analytical views.
+
+### Run Analysis
+Open and execute:
+```bash
+scripts/housing.ipynb
+```
+
+No external API calls are required for the default workflow.
+
+---
+
+## Optional: Build a Parquet Lake
+
+If you want full raw‑data coverage or wish to publish results to object storage:
+
 ```bash
 poetry run build-parquet-lake
 ```
 
----
+This converts cached raw files into a Hive‑partitioned Parquet lake under `data/lake/`.
 
-## Outputs
+The lake can be queried locally or via S3‑compatible storage (MinIO, AWS S3).
 
-- DuckDB analytical tables
-- Parquet files under data/derived
-- Line charts illustrating annual and cumulative housing pressure
-- Parquet lake under data/lake
-
-Optional: Object Storage (S3-compatible)
-The Parquet lake can be published to S3-compatible object storage (e.g. MinIO or AWS S3) and queried directly from DuckDB using Hive-style partitioning.
-
-From there you can query S3:
+Example DuckDB query:
 ```sql
 SELECT
   cbsa_code,
@@ -144,37 +164,36 @@ FROM read_parquet(
   hive_partitioning=1
 )
 GROUP BY cbsa_code, year, quarter;
-100% ▕██████████████████████████████████████▏ (00:00:04.45 elapsed)
-┌───────────┬───────┬─────────┬───────┐
-│ cbsa_code │ year  │ quarter │ rows  │
-│   int64   │ int64 │  int64  │ int64 │
-├───────────┼───────┼─────────┼───────┤
-│     48660 │  2024 │       4 │  1274 │
-│     48660 │  2024 │       3 │  1274 │
-│     48660 │  2024 │       2 │  1274 │
-│       ·   │    ·  │       · │    ·  │
-│       ·   │    ·  │       · │    ·  │
-│       ·   │    ·  │       · │    ·  │
-├───────────┴───────┴─────────┴───────┤
-│ 4046 rows (40 shown)      4 columns │
-└─────────────────────────────────────┘
 ```
+
+---
+
+## Extending the Data
+
+To analyze additional years or metros:
+
+1. Run the ingest pipeline to fetch missing raw data
+2. Rebuild derived Parquet outputs
+3. Re‑run `build-data` to refresh analytical views
+
+This preserves reproducibility while allowing controlled expansion.
 
 ---
 
 ## Notes & Caveats
 
-- Some metros lack complete permit or wage coverage
-- Small base-year permit counts can produce unstable ratios
-- Known anomalies are documented in data/TODO
+- Some metros have incomplete historical coverage
+- Small base‑year permit counts can amplify ratios
+- Known anomalies are tracked in `data/TODO`
 
 ---
 
-## Changelog / Rationale
+## Changelog
 
-- Reorganized README into a clear narrative
-- Removed exploratory or tutorial-style language
-- Clarified scope and limitations
-- Added parquet lake and poetry run script
+- Migrated to derived‑data‑first workflow
+- Removed live‑API dependency from notebooks
+- Added per‑capita normalization
+- Introduced Parquet lake as optional extension
+- Clarified scope and classification logic
 
-Last updated: 2026-01-28
+Last updated: 2026‑02‑02
