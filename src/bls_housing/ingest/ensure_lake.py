@@ -1,5 +1,5 @@
 
-# src/bls_housing/pipeline/ensure_lake.py
+# src/bls_housing/ingest/ensure_lake.py
 
 from __future__ import annotations
 
@@ -7,10 +7,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
-import duckdb
 import pandas as pd
 
-from bls_housing.pipeline.duck import get_analysis_db_connection
+from bls_housing.ingest.duck import get_analysis_db_connection
 from bls_housing.qcew_cache import fetch_area_csv
 from bls_housing.census_cache import fetch_cbsa_csv
 

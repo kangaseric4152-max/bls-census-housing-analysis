@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 from bls_housing.logging_config import configure_logging
-from bls_housing.pipeline.duck import get_analysis_db_connection
+from bls_housing.ingest.duck import get_analysis_db_connection
 
 INCLUDE_RE = re.compile(r"^\s*--\s*include:\s*(.+?)\s*$")
 

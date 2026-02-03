@@ -1,4 +1,4 @@
-# bls_housing/pipeline/parquetify.py
+# bls_housing/ingest/parquetify.py
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 from time import perf_counter
 
-from bls_housing.pipeline.duck import get_analysis_db_connection
+from bls_housing.ingest.duck import get_analysis_db_connection
 
 
 PROJECT_ROOT = Path(__file__).parents[3].resolve()

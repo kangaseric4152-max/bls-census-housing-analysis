@@ -9,7 +9,7 @@ from typing import Iterable
 import pandas as pd
 import duckdb
 
-from bls_housing.pipeline.ensure_lake import ensure_qcew_lake, ensure_permits_csv
+from bls_housing.ingest.ensure_lake import ensure_qcew_lake, ensure_permits_csv
 
 
 def _parse_int_range(s: str) -> list[int]:

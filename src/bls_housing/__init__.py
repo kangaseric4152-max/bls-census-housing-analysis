@@ -23,3 +23,5 @@ __all__ = [
     "fetch_cbsa_xls",
     "convert_census_txt_to_data_frame",
 ]
+
+__version__ = "2.0.0"

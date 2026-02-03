@@ -8,9 +8,6 @@ LOG_DIR = Path(__file__).resolve().parents[2] / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 
-
-    
-
 def configure_logging(
     *,
     level: str = "INFO",
