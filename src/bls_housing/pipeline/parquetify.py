@@ -83,6 +83,9 @@ def build_bls_parquet(con, force: bool = False) -> tuple[int, int]:
 # -----------------------
 # PERMITS 
 # -----------------------
+# IMPORTANT:
+# Hive partition keys must be normalized.
+# Month is always zero-padded (01–12).
 
 CENSUS_CACHE_DIR = PROJECT_ROOT / "data" / "cache" / "census" / "csv"
 CENSUS_LAKE_ROOT = PROJECT_ROOT / "data" / "lake" / "census_permits"
@@ -119,7 +122,7 @@ def build_census_permits_parquet(con, force: bool = False, partition_cbsa: bool 
           tagged AS (
             SELECT
               CAST(regexp_extract(filename, 'CBSA_(\\d{{4}})_(\\d{{2}})\\.csv$', 1) AS INTEGER) AS year,
-              CAST(regexp_extract(filename, 'CBSA_(\\d{{4}})_(\\d{{2}})\\.csv$', 2) AS INTEGER) AS month,
+              regexp_extract(filename, 'CBSA_(\\d{{4}})_(\\d{{2}})\\.csv$', 2) AS month,
               CAST("CBSA" AS BIGINT) AS cbsa_code,
 
               -- Keep whatever you need downstream; examples:

@@ -4,11 +4,19 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 
-PROJECT_ROOT = Path(__file__).parents[3].resolve()  # adjust to your layout
-DBPATH = PROJECT_ROOT / "data" / "analysis.duckdb" 
+PROJECT_ROOT = Path(__file__).parents[3].resolve()
+DBPATH = PROJECT_ROOT / "data" / "analysis.duckdb"
 
 def get_analysis_db_connection(dbpath: str | Path = DBPATH):
-    return duckdb.connect(Path(dbpath))
+    con = duckdb.connect(Path(dbpath))
+
+    # establish session context
+    con.execute(
+        "SET VARIABLE project_root = ?",
+        [str(PROJECT_ROOT)]
+    )
+
+    return con
 
 
 def list_metros(con: duckdb.DuckDBPyConnection, codes: List[int]) -> pd.DataFrame:
@@ -102,7 +110,9 @@ CREATE TABLE IF NOT EXISTS build_meta (
 """)
 
 
-def build_permits_metrics(con: duckdb.DuckDBPyConnection, metros: pd.DataFrame, years: list[int] = [y for y in range(2014, 2024)]) -> pd.DataFrame:
+def build_permits_metrics(con: duckdb.DuckDBPyConnection, 
+                          metros: pd.DataFrame, 
+                          years: list[int] = [y for y in range(2014, 2024)]) -> pd.DataFrame:
     years = sorted(set(years))
     assert len(years) > 1
 
@@ -120,7 +130,10 @@ def build_permits_metrics(con: duckdb.DuckDBPyConnection, metros: pd.DataFrame, 
   """, [years]).df()
 
 
-def build_cumulative_metrics(con: duckdb.DuckDBPyConnection, metros: pd.DataFrame, years: list[int] = [y for y in range(2014, 2024)], base_year: int = 2015) -> pd.DataFrame:
+def build_cumulative_metrics(con: duckdb.DuckDBPyConnection, 
+                             metros: pd.DataFrame, 
+                             years: list[int] = [y for y in range(2014, 2024)], 
+                             base_year: int = 2015) -> pd.DataFrame:
     years = sorted(set(years))
     assert len(years) > 1
     

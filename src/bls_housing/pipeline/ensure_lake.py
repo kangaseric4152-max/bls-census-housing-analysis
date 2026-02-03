@@ -131,7 +131,7 @@ def ensure_permits_lake(
 
     # lake path convention (year/month partitions)
     def lake_path(y: int, m: int) -> Path:
-        return LAKE_PERMITS / f"year={y}" / f"month={m:02d}" / "data.parquet"
+        return LAKE_PERMITS / f"year={y}" / f"month={m:02d}" / "*.parquet"
 
     missing = [(y, m) for (y, m) in requested_keys if (not lake_path(y, m).exists() or force_parquet)]
 

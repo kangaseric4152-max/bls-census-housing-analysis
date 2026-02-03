@@ -2,7 +2,7 @@ from pathlib import Path
 import duckdb
 import re
 from bls_housing.logging_config import configure_logging
-
+from bls_housing.pipeline.duck import get_analysis_db_connection
 
 INCLUDE_RE = re.compile(r"^\s*--\s*include:\s*(.+?)\s*$")
 
@@ -24,13 +24,12 @@ def main():
     configure_logging(level="INFO")
     
     root = Path(__file__).resolve().parents[2]  # repo root
-    db_path = root / "data" / "analysis.duckdb"
     rebuild_sql = root / "data" / "rebuild.sql"
     LOG_DIR = root / "logs"
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 
     print("Building DuckDB database...")
-    con = duckdb.connect(str(db_path))
+    con = get_analysis_db_connection()
 
     sql = expand_sql(rebuild_sql, root)
     con.execute(sql)
