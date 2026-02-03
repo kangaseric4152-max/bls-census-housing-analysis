@@ -122,7 +122,7 @@ def build_census_permits_parquet(con, force: bool = False, partition_cbsa: bool 
           tagged AS (
             SELECT
               CAST(regexp_extract(filename, 'CBSA_(\\d{{4}})_(\\d{{2}})\\.csv$', 1) AS INTEGER) AS year,
-              regexp_extract(filename, 'CBSA_(\\d{{4}})_(\\d{{2}})\\.csv$', 2) AS month,
+              CAST(regexp_extract(filename, 'CBSA_(\\d{{4}})_(\\d{{2}})\\.csv$', 2) AS INTEGER) AS month,
               CAST("CBSA" AS BIGINT) AS cbsa_code,
 
               -- Keep whatever you need downstream; examples:

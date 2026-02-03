@@ -1,5 +1,4 @@
 from pathlib import Path
-import duckdb
 import re
 from bls_housing.logging_config import configure_logging
 from bls_housing.pipeline.duck import get_analysis_db_connection

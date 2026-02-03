@@ -126,14 +126,20 @@ def ensure_permits_lake(
 ) -> EnsureLakeStatus:
     years = [int(y) for y in years]
     months = [int(m) for m in months]
-
     requested_keys: list[tuple[int, int]] = [(y, m) for y in years for m in months]
 
-    # lake path convention (year/month partitions)
-    def lake_path(y: int, m: int) -> Path:
-        return LAKE_PERMITS / f"year={y}" / f"month={m:02d}" / "*.parquet"
+    # Partition directory convention (use integer month, no zero pad)
+    def part_dir(y: int, m: int) -> Path:
+        return LAKE_PERMITS / f"year={y}" / f"month={m}"
 
-    missing = [(y, m) for (y, m) in requested_keys if (not lake_path(y, m).exists() or force_parquet)]
+    def partition_has_parquet(y: int, m: int) -> bool:
+        d = part_dir(y, m)
+        return d.exists() and any(d.glob("*.parquet"))
+
+    missing = [
+        (y, m) for (y, m) in requested_keys
+        if force_parquet or not partition_has_parquet(y, m)
+    ]
 
     fetched = 0
     parquet_written = 0
@@ -150,32 +156,53 @@ def ensure_permits_lake(
             )
             fetched += 1
 
-        # 2) parquetify monthly CSV -> partitioned parquet
-        for y, m in missing:
-            out = lake_path(y, m)
-            out.parent.mkdir(parents=True, exist_ok=True)
+        # 2) canonical parquet writer ONLY
+        # Option 1 (recommended): write partitions for just the requested (y,m)
+        # by filtering filenames and projecting a canonical schema.
+        #
+        # This avoids "rebuild whole lake" and avoids a second schema.
+        #
+        if missing:
+            # You can either:
+            # - write each (y,m) partition individually (OVERWRITE true for that partition)
+            # - OR run one COPY that filters to only missing months and partitions by year/month
+            #
+            # This is the "one writer" SQL pattern, but targeted to only missing months.
 
-            src_csv = CACHE_CENSUS_CSV / f"CBSA_{y}_{m:02d}.csv"
-            if not src_csv.exists():
-                continue
+            for y, m in missing:
+                src = CACHE_CENSUS_CSV / f"CBSA_{y}_{m:02d}.csv"
+                if not src.exists():
+                    continue
 
-            if out.exists() and not force_parquet:
-                parquet_skipped += 1
-                continue
+                out_dir = part_dir(y, m)
+                out_dir.mkdir(parents=True, exist_ok=True)
 
-            # Add year/month columns at write time (so future queries can filter cleanly)
-            con.execute(f"""
-                COPY (
-                    SELECT
-                        *,
-                        CAST({y} AS INTEGER) AS year,
-                        CAST({m} AS INTEGER) AS month
-                    FROM read_csv_auto('{str(src_csv).replace("'", "''")}', union_by_name=true)
-                )
-                TO '{str(out).replace("'", "''")}'
-                (FORMAT PARQUET);
-            """)
-            parquet_written += 1
+                # If already present and not forcing, skip
+                if partition_has_parquet(y, m) and not force_parquet:
+                    parquet_skipped += 1
+                    continue
+
+                con.execute(f"""
+                    COPY (
+                        SELECT
+                            CAST({y} AS INTEGER) AS year,
+                            CAST({m} AS INTEGER) AS month,
+                            CAST("CBSA" AS BIGINT) AS cbsa_code,
+
+                            CAST("Total" AS BIGINT) AS total_permits,
+                            CAST("1 Unit" AS BIGINT) AS permits_1_unit,
+                            CAST("2 Unit" AS BIGINT) AS permits_2_unit,
+                            CAST("3 and 4 Units" AS BIGINT) AS permits_3_4_units,
+                            CAST("5 Units or More" AS BIGINT) AS permits_5_plus,
+
+                            "Name" AS area_name,
+                            CAST("Metro /Micro Code" AS INTEGER) AS metro_micro_code
+                        FROM read_csv_auto('{str(src).replace("'", "''")}', union_by_name=true)
+                    )
+                    TO '{str(out_dir).replace("'", "''")}'
+                    (FORMAT PARQUET, OVERWRITE true);
+                """)
+                parquet_written += 1
 
     present = len(requested_keys) - len(missing) + parquet_written
     return EnsureLakeStatus(
