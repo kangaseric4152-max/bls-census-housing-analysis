@@ -8,6 +8,8 @@ _Reproducible data pipeline and analytical reference using U.S. public datasets_
 This repository provides a reproducible data pipeline and analysis workflow for exploring
 metro‑level housing supply relative to labor growth using U.S. public datasets:
 
+This project now treats Parquet + DuckDB SQL as the primary data transformation layer; Python is used mainly for orchestration and CLI utilities.
+
 - **Bureau of Labor Statistics (BLS)** — Quarterly Census of Employment and Wages (QCEW)
 - **U.S. Census Bureau** — Building Permits Survey (BPS) and Population Estimates
 
@@ -65,7 +67,7 @@ This avoids brittle dependencies on government endpoints while preserving a clea
 
 ```bash
 src/bls_housing/
-  pipeline/        SQL + Python pipeline logic
+  ingest/        SQL + Python  logic
   duck.py          DuckDB helpers and execution utilities
   helpers.py       Shared constants and utilities
 
