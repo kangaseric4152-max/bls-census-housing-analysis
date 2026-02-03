@@ -16,7 +16,6 @@ from bls_housing.census_cache import fetch_cbsa_csv
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 LAKE_BLS = PROJECT_ROOT / "data" / "lake" / "bls"
-LAKE_PERMITS = PROJECT_ROOT / "data" / "lake" / "census_permits"
 
 CACHE_BLS = PROJECT_ROOT / "data" / "cache" / "bls"
 CACHE_CENSUS_CSV = PROJECT_ROOT / "data" / "cache" / "census" / "csv"
@@ -117,100 +116,75 @@ def ensure_qcew_lake(
     )
 
 
-def ensure_permits_lake(
+def ensure_permits_csv(
     years: Iterable[int],
     months: Iterable[int] = range(1, 13),
     *,
     force_download: bool = False,
-    force_parquet: bool = False,
+
 ) -> EnsureLakeStatus:
     years = [int(y) for y in years]
     months = [int(m) for m in months]
     requested_keys: list[tuple[int, int]] = [(y, m) for y in years for m in months]
 
-    # Partition directory convention (use integer month, no zero pad)
-    def part_dir(y: int, m: int) -> Path:
-        return LAKE_PERMITS / f"year={y}" / f"month={m}"
-
-    def partition_has_parquet(y: int, m: int) -> bool:
-        d = part_dir(y, m)
-        return d.exists() and any(d.glob("*.parquet"))
-
-    missing = [
-        (y, m) for (y, m) in requested_keys
-        if force_parquet or not partition_has_parquet(y, m)
-    ]
-
-    fetched = 0
-    parquet_written = 0
-    parquet_skipped = 0
+    #missing = [
+    #    (y, m) for (y, m) in requested_keys
+    #]
+    df = pd.DataFrame()
 
     with get_analysis_db_connection() as con:
-        # 1) fetch/convert missing monthly CSVs into cache
-        for y, m in missing:
-            fetch_cbsa_csv(
-                year=str(y),
-                mon=f"{m:02d}",
-                csv_cache_dir=CACHE_CENSUS_CSV,
-                force_download=force_download,
+        # check for missing census cache files.
+        df = con.execute("""
+            WITH date_range AS (
+            SELECT year, mon
+            FROM (SELECT UNNEST(?) AS year) y
+            CROSS JOIN (SELECT UNNEST(?) AS mon) m
+            ),
+            files AS (
+            SELECT file
+            FROM glob(project_path('/data/cache/census/csv/CBSA_*.csv'))
+            ),
+            present AS (
+            SELECT
+                TRY_CAST(regexp_extract(file, 'CBSA_(\\d{4})_(\\d{2})\\.csv$', 1) AS INT) AS year,
+                TRY_CAST(regexp_extract(file, 'CBSA_(\\d{4})_(\\d{2})\\.csv$', 2) AS INT) AS mon
+            FROM files
+            WHERE regexp_matches(file, 'CBSA_\\d{4}_\\d{2}\\.csv$')
+            ),
+            missing AS (
+            SELECT d.year, d.mon
+            FROM date_range d
+            LEFT JOIN present p
+                ON d.year = p.year AND d.mon = p.mon
+            WHERE p.year IS NULL
             )
-            fetched += 1
+            SELECT year, mon
+            FROM missing
+            ORDER BY year, mon;
+        """, [years, months]).df()
 
-        # 2) canonical parquet writer ONLY
-        # Option 1 (recommended): write partitions for just the requested (y,m)
-        # by filtering filenames and projecting a canonical schema.
-        #
-        # This avoids "rebuild whole lake" and avoids a second schema.
-        #
-        if missing:
-            # You can either:
-            # - write each (y,m) partition individually (OVERWRITE true for that partition)
-            # - OR run one COPY that filters to only missing months and partitions by year/month
-            #
-            # This is the "one writer" SQL pattern, but targeted to only missing months.
+    missing: list[tuple[int, int]] = list(df.itertuples(index=False, name=None))
+    assert all(1 <= m <= 12 for _, m in missing)
+    fetched = 0
 
-            for y, m in missing:
-                src = CACHE_CENSUS_CSV / f"CBSA_{y}_{m:02d}.csv"
-                if not src.exists():
-                    continue
+    
+    # 1) fetch/convert missing monthly CSVs into cache
+    for y, m in missing:
+        fetch_cbsa_csv(
+            year=str(y),
+            mon=f"{m:02d}",
+            csv_cache_dir=CACHE_CENSUS_CSV,
+            force_download=force_download,
+        )
+        fetched += 1
 
-                out_dir = part_dir(y, m)
-                out_dir.mkdir(parents=True, exist_ok=True)
-
-                # If already present and not forcing, skip
-                if partition_has_parquet(y, m) and not force_parquet:
-                    parquet_skipped += 1
-                    continue
-
-                con.execute(f"""
-                    COPY (
-                        SELECT
-                            CAST({y} AS INTEGER) AS year,
-                            CAST({m} AS INTEGER) AS month,
-                            CAST("CBSA" AS BIGINT) AS cbsa_code,
-
-                            CAST("Total" AS BIGINT) AS total_permits,
-                            CAST("1 Unit" AS BIGINT) AS permits_1_unit,
-                            CAST("2 Unit" AS BIGINT) AS permits_2_unit,
-                            CAST("3 and 4 Units" AS BIGINT) AS permits_3_4_units,
-                            CAST("5 Units or More" AS BIGINT) AS permits_5_plus,
-
-                            "Name" AS area_name,
-                            CAST("Metro /Micro Code" AS INTEGER) AS metro_micro_code
-                        FROM read_csv_auto('{str(src).replace("'", "''")}', union_by_name=true)
-                    )
-                    TO '{str(out_dir).replace("'", "''")}'
-                    (FORMAT PARQUET, OVERWRITE true);
-                """)
-                parquet_written += 1
-
-    present = len(requested_keys) - len(missing) + parquet_written
+    present = len(requested_keys) - len(missing) 
     return EnsureLakeStatus(
         requested=len(requested_keys),
         present=present,
         missing=len(missing),
         fetched=fetched,
-        parquet_written=parquet_written,
-        parquet_skipped=parquet_skipped,
+        parquet_written=0,
+        parquet_skipped=0,
         missing_keys=missing,
     )

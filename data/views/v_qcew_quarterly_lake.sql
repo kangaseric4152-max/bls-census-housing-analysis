@@ -8,6 +8,7 @@ SELECT
   -- everything from the underlying parquet
   *
 FROM read_parquet(
-  project_path('/data/lake/bls/**/*.parquet'),
-  hive_partitioning=1
+  project_path('/data/demo/qcew_demo.parquet')
+  --project_path('/data/lake/bls/**/*.parquet'),
+  --hive_partitioning=1
 );
