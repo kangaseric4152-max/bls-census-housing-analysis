@@ -2,7 +2,11 @@
 
 -- include: data/ingest/ingest_dim_metro_full.sql
 -- include: data/ingest/ingest_cbsa_population.sql
--- include: data/ingest/ingest_inputs_percap.sql
+
+-- include: data/views/v_permits_monthly_lake.sql
+-- include: data/views/v_annual_permits_lake.sql
+-- include: data/views/inputs_percap.sql
+
 
 DROP TABLE IF EXISTS annual_metrics_stage;
 DROP TABLE IF EXISTS cumulative_metrics_stage;
