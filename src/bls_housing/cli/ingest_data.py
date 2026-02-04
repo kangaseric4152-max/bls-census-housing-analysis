@@ -8,6 +8,10 @@ from typing import Iterable
 
 import pandas as pd
 import duckdb
+import logging
+from bls_housing.logging_config import configure_logging
+
+logger = logging.getLogger(__name__)
 
 from bls_housing.ingest.ensure_lake import ensure_qcew_lake, ensure_permits_csv
 
@@ -140,6 +144,7 @@ def _load_keys_from_sql(
 
 
 def main() -> int:
+    configure_logging(level="INFO")
     p = argparse.ArgumentParser()
     p.add_argument("--dataset", choices=["qcew", "permits"], required=True)
 
@@ -169,6 +174,8 @@ def main() -> int:
     sql_file = Path(args.sql_file).expanduser() if args.sql_file else None
     db_path = Path(args.db).expanduser()
 
+    logger.info("ingest_data CLI start: dataset=%s sql_file=%s years=%s", args.dataset, sql_file, args.years)
+
     if sql_file:
         metros, years, third, _ = _load_keys_from_sql(
             dataset=args.dataset,
@@ -184,9 +191,9 @@ def main() -> int:
             assert quarters is not None
 
             if args.dry_run:
-                print("[ingest-data] mode=sql dataset=qcew")
-                print(f"[ingest-data] metros={len(metros)} years={years} quarters={quarters}")
-                print(metros.head(10).to_string(index=False))
+                logger.info("[ingest-data] mode=sql dataset=qcew")
+                logger.info("[ingest-data] metros=%d years=%s quarters=%s", len(metros), years, quarters)
+                logger.info("%s", metros.head(10).to_string(index=False))
                 return 0
 
             st = ensure_qcew_lake(
@@ -201,8 +208,8 @@ def main() -> int:
             months = third
 
             if args.dry_run:
-                print("[ingest-data] mode=sql dataset=permits")
-                print(f"[ingest-data] years={years} months={months}")
+                logger.info("[ingest-data] mode=sql dataset=permits")
+                logger.info("[ingest-data] years=%s months=%s", years, months)
                 return 0
 
             st = ensure_permits_csv(
@@ -230,8 +237,8 @@ def main() -> int:
             metros = pd.DataFrame({"Code": cbsa_codes})
 
             if args.dry_run:
-                print("[ingest-data] mode=params dataset=qcew")
-                print(f"[ingest-data] metros={cbsa_codes} years={years} quarters={quarters}")
+                logger.info("[ingest-data] mode=params dataset=qcew")
+                logger.info("[ingest-data] metros=%s years=%s quarters=%s", cbsa_codes, years, quarters)
                 return 0
 
             st = ensure_qcew_lake(
@@ -248,8 +255,8 @@ def main() -> int:
                 raise SystemExit("--months must not be empty for dataset=permits")
 
             if args.dry_run:
-                print("[ingest-data] mode=params dataset=permits")
-                print(f"[ingest-data] years={years} months={months}")
+                logger.info("[ingest-data] mode=params dataset=permits")
+                logger.info("[ingest-data] years=%s months=%s", years, months)
                 return 0
 
             st = ensure_permits_csv(
@@ -258,9 +265,13 @@ def main() -> int:
                 force_download=args.force_download,
             )
 
-    print(
-        f"[ingest-data] requested={st.requested} missing={st.missing} "
-        f"fetched={st.fetched} parquet_written={st.parquet_written} skipped={st.parquet_skipped}"
+    logger.info(
+        "[ingest-data] requested=%d missing=%d fetched=%d parquet_written=%d skipped=%d",
+        st.requested,
+        st.missing,
+        st.fetched,
+        st.parquet_written,
+        st.parquet_skipped,
     )
     return 0
 

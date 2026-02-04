@@ -3,11 +3,14 @@ from typing import List
 from pathlib import Path
 import duckdb
 import pandas as pd
+import logging
 
 PROJECT_ROOT = Path(__file__).parents[3].resolve()
 DBPATH = PROJECT_ROOT / "data" / "analysis.duckdb"
 
 def get_analysis_db_connection(dbpath: str | Path = DBPATH):
+    logger = logging.getLogger(__name__)
+    logger.info("Connecting to analysis DuckDB at %s", dbpath)
     con = duckdb.connect(Path(dbpath))
 
     # establish session context
@@ -20,12 +23,14 @@ def get_analysis_db_connection(dbpath: str | Path = DBPATH):
 
 
 def list_metros(con: duckdb.DuckDBPyConnection, codes: List[int]) -> pd.DataFrame:
-    return con.execute("""
+    df = con.execute("""
         SELECT Code, Area, Title
         FROM dim_metro_full
         WHERE Code IN (SELECT * FROM UNNEST(?))
         ORDER BY Area, Title
     """, [codes]).df()
+    logging.getLogger(__name__).info("list_metros: requested=%d returned=%d", len(codes), len(df))
+    return df
 
 
 def build_permits_metrics(con: duckdb.DuckDBPyConnection, 
@@ -33,8 +38,8 @@ def build_permits_metrics(con: duckdb.DuckDBPyConnection,
                           years: list[int] = [y for y in range(2014, 2024)]) -> pd.DataFrame:
     years = sorted(set(years))
     assert len(years) > 1
-
-    return con.execute("""
+    logging.getLogger(__name__).info("build_permits_metrics: metros=%d years=%s", len(metros), years)
+    df = con.execute("""
         SELECT
         i.area,
         i.code,
@@ -46,6 +51,8 @@ def build_permits_metrics(con: duckdb.DuckDBPyConnection,
         WHERE i.year IN (select * from UNNEST(?))
         ORDER BY code, year;
   """, [years]).df()
+    logging.getLogger(__name__).info("build_permits_metrics: returned rows=%d", len(df))
+    return df
 
 
 def build_cumulative_metrics(con: duckdb.DuckDBPyConnection, 
@@ -54,7 +61,7 @@ def build_cumulative_metrics(con: duckdb.DuckDBPyConnection,
                              base_year: int = 2015) -> pd.DataFrame:
     years = sorted(set(years))
     assert len(years) > 1
-    
+    logging.getLogger(__name__).info("build_cumulative_metrics: metros=%d years=%s base_year=%s", len(metros), years, base_year)
     q = """
         WITH params AS (SELECT CAST(? AS INTEGER) AS base_year),
 
@@ -87,4 +94,6 @@ def build_cumulative_metrics(con: duckdb.DuckDBPyConnection,
         WHERE f.year IN (SELECT * FROM unnest(?))
         ORDER BY code, year;
         """
-    return con.execute(q, [base_year, years]).df()
+    df = con.execute(q, [base_year, years]).df()
+    logging.getLogger(__name__).info("build_cumulative_metrics: returned rows=%d", len(df))
+    return df

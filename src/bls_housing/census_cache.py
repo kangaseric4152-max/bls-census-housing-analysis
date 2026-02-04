@@ -10,9 +10,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
+import logging
 import pandas as pd
 import requests
 from bls_housing.census_txt_parser import convert_census_txt_to_csv
+
+logger = logging.getLogger(__name__)
 
 # Repository root (two levels up from this file: src/bls_housing -> src -> repo root)
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -109,7 +112,8 @@ def fetch_census_txt(
     cache_dir_path = _ensure_cache_dir(cache_dir)
     cached = get_cached_txt_path(year, mon, cache_dir_path)
     if cached and not force_download:
-        return cached       
+        logger.info("Using cached census TXT for %s-%s -> %s", year, mon, cached)
+        return cached
     url = get_census_cbsa_url(year, mon)
     try:
         resp = requests.get(url, timeout=timeout)
@@ -122,6 +126,11 @@ def fetch_census_txt(
     with open(tmp_path, "wb") as fh:
         fh.write(resp.content)
     tmp_path.replace(out_path)
+    try:
+        size = out_path.stat().st_size
+    except Exception:
+        size = None
+    logger.info("Downloaded census TXT %s (size=%s bytes)", out_path, size)
     return out_path
 
 
@@ -137,6 +146,7 @@ def fetch_cbsa_xls(
     cache_dir_path = _ensure_cache_dir(cache_dir)
     cached = get_cached_xls_path(year, mon, cache_dir_path)
     if cached and not force_download:
+        logger.info("Using cached CBSA XLS for %s-%s -> %s", year, mon, cached)
         return cached
 
     url = get_census_cbsa_url(year, mon)
@@ -152,13 +162,18 @@ def fetch_cbsa_xls(
     with open(tmp_path, "wb") as fh:
         fh.write(resp.content)
     tmp_path.replace(out_path)
-
+    try:
+        size = out_path.stat().st_size
+    except Exception:
+        size = None
+    logger.info("Downloaded CBSA XLS %s (size=%s bytes)", out_path, size)
     return out_path
 
 
 def clean_and_convert_xls_to_csv(xls_path: Path, csv_path: Path) -> None:
     """Convert the census CBSA XLS to a cleaned CSV file."""
     import pandas as pd
+    logger.info("Converting XLS %s to CSV %s", xls_path, csv_path)
     df = pd.read_excel(xls_path, header=None)
 
     # Find the header row by looking for the 'CSA' or 'CBSA' label (robust to shifted rows)
@@ -215,6 +230,7 @@ def clean_and_convert_xls_to_csv(xls_path: Path, csv_path: Path) -> None:
 
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(csv_path, index=False)
+    logger.info("Wrote cleaned CSV %s: rows=%d cols=%d", csv_path, len(df), len(df.columns))
 
 
 def fetch_cbsa_csv(

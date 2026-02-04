@@ -31,17 +31,16 @@ def _parse_census_stream(file_path: Path | str):
         buffer_code = None
         buffer_name = None
         line_no = 0
+        parsed_count = 0
         for line in f:
             line_no += 1
 
-            logger.debug(f"Processing line {line_no}: {line.rstrip()}")
-
-            if(line_no < 12): 
+            if(line_no < 12):
                 continue # Skip header lines  # noqa: E701
-            if not line.strip(): 
+            if not line.strip():
                 continue # Skip empty  # noqa: E701
             # If the line starts with '*', we are done with the data.
-            if line.strip().startswith('*'): 
+            if line.strip().startswith('*'):
                 break
             # Check if the line STARTS with a Code (Digits) or Spaces
             # The first few chars of the continuation line appear to be spaces
@@ -49,21 +48,23 @@ def _parse_census_stream(file_path: Path | str):
 
             if has_leading_code:
                 # SCENARIO: New Record Start
-                
+
                 # 1. If we have a buffered record waiting, it was a "Single Line" record. Yield it.
-                if buffer_code: 
+                if buffer_code:
+                    parsed_count += 1
                     yield {
-                        "code": buffer_code, 
-                        "name": buffer_name, 
+                        "code": buffer_code,
+                        "name": buffer_name,
                         "raw_data": "" # Empty data means we need to handle "Single Line with Data" logic
                     }
 
                 # 2. Check if this new line has data numbers at the end
                 # Heuristic: Does the end of the line look like numbers?
                 line_has_data = any(char.isdigit() for char in line[code_start:])
-                
+
                 if line_has_data:
                     # It's a complete Single Line Record
+                    parsed_count += 1
                     yield {
                         "code": line[SLICE_CODE].strip(),
                         "name": line[SLICE_NAME].strip(),
@@ -77,24 +78,23 @@ def _parse_census_stream(file_path: Path | str):
 
             else:
                 # SCENARIO: Continuation Line (Starts with spaces)
-                logger.debug(f"Continuation line detected at line {line_no}.")
                 if buffer_code:
                     # Merge with buffer
                     if(buffer_name is None):
                         raise ValueError(f"Buffer name is None when processing continuation line at line {line_no}")
                     full_name = buffer_name + " " + line[SLICE_NAME_MULTI_LINE].strip()
-                    logger.debug(f"Continuation line found. Merged name: {full_name}")
                     raw_data = line[SLICE_DATA]
-                    logger.debug(f"Continuation line raw data: {raw_data.strip()}")
+                    parsed_count += 1
                     yield {
-                        "code": buffer_code, 
-                        "name": full_name, 
+                        "code": buffer_code,
+                        "name": full_name,
                         "raw_data": raw_data
                     }
                     buffer_code = None # Buffer consumed
                 else:
                     # Orphaned continuation line? (Shouldn't happen)
                     continue
+    logger.info("Finished parsing file %s: parsed_records=%d", file_path, parsed_count)
     logger.info("Finished parsing file.")
 
 def convert_parsed_record(record):

@@ -7,6 +7,10 @@ import re
 from time import perf_counter
 
 from bls_housing.ingest.duck import get_analysis_db_connection
+from bls_housing.logging_config import configure_logging
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 PROJECT_ROOT = Path(__file__).parents[3].resolve()
@@ -19,6 +23,7 @@ BLS_LAKE_ROOT = PROJECT_ROOT / "data" / "lake" / "bls"
 
 
 def build_bls_manifest(con) -> int:
+    logger.info("build_bls_manifest start: scanning %s", bls_dir)
     pat = re.compile(r"C(\d{4})_(\d{4})_([1-4])\.csv$")
     rows = []
     for p in bls_dir.glob("C????_????_?.csv"):
@@ -34,6 +39,8 @@ def build_bls_manifest(con) -> int:
             str(p.resolve()),
         ))
 
+    logger.info("Found %d BLS CSV files to register", len(rows))
+
     con.execute("""
         CREATE OR REPLACE TABLE bls_raw_manifest(
             qcew_area VARCHAR,
@@ -43,8 +50,11 @@ def build_bls_manifest(con) -> int:
             src_csv VARCHAR
         )
     """)
-    con.executemany("INSERT INTO bls_raw_manifest VALUES (?, ?, ?, ?, ?)", rows)
-    return con.sql("select count(*) as rows from bls_raw_manifest").df()["rows"].iloc[0]
+    if rows:
+        con.executemany("INSERT INTO bls_raw_manifest VALUES (?, ?, ?, ?, ?)", rows)
+    count = con.sql("select count(*) as rows from bls_raw_manifest").df()["rows"].iloc[0]
+    logger.info("build_bls_manifest done: manifest_rows=%d", int(count))
+    return int(count)
 
 
 def build_bls_parquet(con, force: bool = False) -> tuple[int, int]:
@@ -55,6 +65,8 @@ def build_bls_parquet(con, force: bool = False) -> tuple[int, int]:
         FROM bls_raw_manifest
         ORDER BY cbsa_code, year, quarter
     """).fetchall()
+
+    logger.info("build_bls_parquet start: partitions=%d force=%s", len(rows), force)
 
     for cbsa_code, year, quarter, src_csv in rows:
         out_dir = BLS_LAKE_ROOT / f"cbsa_code={cbsa_code}" / f"year={year}" / f"quarter={quarter}"
@@ -76,6 +88,7 @@ def build_bls_parquet(con, force: bool = False) -> tuple[int, int]:
         """)
         written += 1
 
+    logger.info("build_bls_parquet done: written=%d skipped=%d", written, skipped)
     return written, skipped
 
 
@@ -84,20 +97,20 @@ def build_bls_parquet(con, force: bool = False) -> tuple[int, int]:
 # -----------------------
 def main() -> int:
     t0 = perf_counter()
-    print("[build-parquet-lake] starting...")
+    configure_logging(level="INFO")
+    logger.info("[build-parquet-lake] starting...")
 
     with get_analysis_db_connection() as con:
         # BLS
         bls_n = build_bls_manifest(con)
-        print(f"[build-parquet-lake] bls manifest rows: {bls_n} in {perf_counter() - t0:.2f}s")
+        logger.info("[build-parquet-lake] bls manifest rows: %d in %.2fs", bls_n, perf_counter() - t0)
         if bls_n:
             w, s = build_bls_parquet(con)
-            print(f"[build-parquet-lake] bls parquet written: {w}, skipped: {s}")
+            logger.info("[build-parquet-lake] bls parquet written: %d skipped: %d", w, s)
         else:
-            print("[build-parquet-lake] bls: no source files found")
+            logger.info("[build-parquet-lake] bls: no source files found")
 
-    
-    print(f"[build-parquet-lake] done in {perf_counter() - t0:.2f}s")
+    logger.info("[build-parquet-lake] done in %.2fs", perf_counter() - t0)
     return 0
 
 

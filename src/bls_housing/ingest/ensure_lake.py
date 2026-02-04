@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Iterable
 
 import pandas as pd
+import logging
 
 from bls_housing.ingest.duck import get_analysis_db_connection
 from bls_housing.qcew_cache import fetch_area_csv
@@ -45,9 +46,13 @@ def ensure_qcew_lake(
     force_parquet: bool = False,
     timeout: int = 30,
 ) -> EnsureLakeStatus:
+    logger = logging.getLogger(__name__)
     cbsa_codes = _metros_to_cbsa_codes(metros)
     years = [int(y) for y in years]
     quarters = [int(q) for q in quarters]
+
+    logger.info("ensure_qcew_lake start: metros=%d years=%s quarters=%s force_download=%s force_parquet=%s",
+                len(cbsa_codes), years, quarters, force_download, force_parquet)
 
     requested_keys: list[tuple[int, int, int]] = [
         (cbsa, y, q) for cbsa in cbsa_codes for y in years for q in quarters
@@ -104,6 +109,8 @@ def ensure_qcew_lake(
             parquet_written += 1
 
     present = len(requested_keys) - len(missing) + parquet_written  # “best effort”; not perfect if 404s
+    logger.info("ensure_qcew_lake done: requested=%d present=%d missing=%d fetched=%d parquet_written=%d parquet_skipped=%d",
+                len(requested_keys), present, len(missing), fetched, parquet_written, parquet_skipped)
     return EnsureLakeStatus(
         requested=len(requested_keys),
         present=present,
@@ -122,6 +129,7 @@ def ensure_permits_csv(
     force_download: bool = False,
 
 ) -> EnsureLakeStatus:
+    logger = logging.getLogger(__name__)
     years = [int(y) for y in years]
     months = [int(m) for m in months]
     requested_keys: list[tuple[int, int]] = [(y, m) for y in years for m in months]
@@ -164,6 +172,8 @@ def ensure_permits_csv(
 
     missing: list[tuple[int, int]] = list(df.itertuples(index=False, name=None))
     assert all(1 <= m <= 12 for _, m in missing)
+    logger.info("ensure_permits_csv start: years=%s months=%s force_download=%s",
+                years, months, force_download)
     fetched = 0
 
     
@@ -177,7 +187,9 @@ def ensure_permits_csv(
         )
         fetched += 1
 
-    present = len(requested_keys) - len(missing) 
+    present = len(requested_keys) - len(missing)
+    logger.info("ensure_permits_csv done: requested=%d present=%d missing=%d fetched=%d",
+                len(requested_keys), present, len(missing), fetched)
     return EnsureLakeStatus(
         requested=len(requested_keys),
         present=present,

@@ -68,6 +68,7 @@ def fetch_area_csv(
     cache_dir_path = _ensure_cache_dir(cache_dir)
     cached = get_cached_path(area, year, qtr, cache_dir_path)
     if cached and not force_download:
+        logger.info("Using cached QCEW CSV for %s %s Q%s -> %s", area, year, qtr, cached)
         return cached
 
     url = qcew_get_area_url(year, qtr, area)
@@ -85,7 +86,11 @@ def fetch_area_csv(
     with open(tmp_path, "wb") as fh:
         fh.write(resp.content)
     tmp_path.replace(out_path)
-
+    try:
+        size = out_path.stat().st_size
+    except Exception:
+        size = None
+    logger.info("Downloaded QCEW CSV %s (size=%s bytes)", out_path, size)
     return out_path
 
 
@@ -101,6 +106,7 @@ def load_area_df(
 
     Any additional keyword args are forwarded to `pandas.read_csv`.
     """
+    logger.info("Loading QCEW area CSV for area=%s year=%s qtr=%s force_download=%s", area, year, qtr, force_download)
     csv_path = fetch_area_csv(area, year, qtr, cache_dir=cache_dir, force_download=force_download)
     df = pd.read_csv(csv_path, **pd_read_csv_kwargs)
 
@@ -111,6 +117,7 @@ def load_area_df(
         logger.error(f"Missing expected QCEW columns: {missing}. Source CSV: {csv_path}")
         raise ValueError(f"Missing expected QCEW columns: {missing}. Source CSV: {csv_path}")
 
+    logger.info("Loaded QCEW DataFrame from %s: rows=%d cols=%d", csv_path, len(df), len(df.columns))
     return df
 
 
