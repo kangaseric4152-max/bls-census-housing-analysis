@@ -10,10 +10,9 @@ import pandas as pd
 import duckdb
 import logging
 from bls_housing.logging_config import configure_logging
+from bls_housing.ingest.ensure_lake import ensure_qcew_lake, ensure_permits_csv
 
 logger = logging.getLogger(__name__)
-
-from bls_housing.ingest.ensure_lake import ensure_qcew_lake, ensure_permits_csv
 
 
 def _parse_int_range(s: str) -> list[int]:

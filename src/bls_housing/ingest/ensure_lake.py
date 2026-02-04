@@ -190,6 +190,7 @@ def ensure_permits_csv(
     present = len(requested_keys) - len(missing)
     logger.info("ensure_permits_csv done: requested=%d present=%d missing=%d fetched=%d",
                 len(requested_keys), present, len(missing), fetched)
+
     return EnsureLakeStatus(
         requested=len(requested_keys),
         present=present,

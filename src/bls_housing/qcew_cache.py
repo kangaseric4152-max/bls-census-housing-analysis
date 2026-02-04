@@ -90,7 +90,7 @@ def fetch_area_csv(
         size = out_path.stat().st_size
     except Exception:
         size = None
-    logger.info("Downloaded QCEW CSV %s (size=%s bytes)", out_path, size)
+    logger.debug("Downloaded QCEW CSV %s (size=%s bytes)", out_path, size)
     return out_path
 
 
