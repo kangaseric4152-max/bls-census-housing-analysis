@@ -103,6 +103,18 @@ pyproject.toml
 
 ---
 
+## Architecture
+
+- CLI-based ingestion (ingest-data)
+- Caching to avoid repeated API calls
+- Parquet usage for analytics efficiency
+- DuckDB as an analytical engine
+- Deterministic rebuild (build-data)
+- Logging + smoke tests
+- Clear separation of raw / derived / analytics layers
+
+---
+
 ## Area Classification Notes
 
 - Analysis is limited to **Metropolitan Statistical Areas (MSAs)**
