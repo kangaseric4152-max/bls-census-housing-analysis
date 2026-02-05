@@ -209,5 +209,6 @@ This preserves reproducibility while allowing controlled expansion.
 - Added per‑capita normalization
 - Introduced Parquet lake as optional extension
 - Clarified scope and classification logic
+- Added architecture section
 
-Last updated: 2026‑02‑02
+Last updated: 2026‑02‑05
