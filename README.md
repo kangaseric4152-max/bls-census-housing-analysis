@@ -5,19 +5,24 @@ _Reproducible data pipeline and analytical reference using U.S. public datasets_
 
 ## Overview
 
-This repository provides a reproducible data pipeline and analysis workflow for exploring
-metro‑level housing supply relative to labor growth using U.S. public datasets:
+This repository provides a reproducible data pipeline and analytical workflow for exploring
+metro-level housing supply relative to labor growth using U.S. public datasets.
 
-This project now treats Parquet + DuckDB SQL as the primary data transformation layer; Python is used mainly for orchestration and CLI utilities.
+It implements an **end-to-end ingestion → normalization → analytics pipeline**, producing
+queryable Parquet datasets, DuckDB analytical views, and reproducible housing-pressure metrics.
 
+This project treats **Parquet + DuckDB SQL as the primary transformation layer**; Python is used
+mainly for orchestration, CLI utilities, and controlled ingestion.
+
+Primary data sources:
 - **Bureau of Labor Statistics (BLS)** — Quarterly Census of Employment and Wages (QCEW)
 - **U.S. Census Bureau** — Building Permits Survey (BPS) and Population Estimates
 
 The project is designed as a **reference implementation** for:
-- Public‑data ingestion and normalization
-- Parquet‑based analytical workflows
-- SQL‑first metric derivation using DuckDB
-- Transparent, policy‑relevant housing indicators
+- Public-data ingestion and normalization
+- Parquet-based analytical workflows
+- SQL-first metric derivation using DuckDB
+- Transparent, policy-relevant housing indicators
 
 This is **not** a predictive model. The focus is clarity, reproducibility, and extensibility.
 
