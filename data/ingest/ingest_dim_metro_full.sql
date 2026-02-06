@@ -6,7 +6,7 @@ SELECT
 FROM read_csv_auto('data/raw/metros.csv', header=true);
 
 -- quick sanity checks
--- Expect 260 rows
+-- Expect 257 rows (used to be 260 but 3 were Metros were downgraded in 2020)
 SELECT COUNT(*) AS n_rows FROM dim_metro_full;
 SELECT * FROM dim_metro_full LIMIT 5;
 -- CSV shape check (should return 0 rows)

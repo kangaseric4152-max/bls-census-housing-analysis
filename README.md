@@ -72,7 +72,7 @@ This avoids brittle dependencies on government endpoints while preserving a clea
 
 ```bash
 src/bls_housing/
-  ingest/        SQL + Python  logic
+  ingest/          SQL + Python  logic
   duck.py          DuckDB helpers and execution utilities
   helpers.py       Shared constants and utilities
 

@@ -45,9 +45,12 @@ def build_permits_metrics(con: duckdb.DuckDBPyConnection,
         i.code,
         cast(i.year AS INT) AS year,
         i.permits_per_1k,
-        i.permits_per_1k - lag(i.permits_per_1k) over (partition by i.code order by i.year) AS delta_permits_per_1k
+        i.permits_per_1k - lag(i.permits_per_1k) over (partition by i.code order by i.year) AS delta_permits_per_1k,
+        p.share_1_unit,
+        p.share_5_plus
         FROM inputs_percap i
         JOIN metros USING (code) 
+        JOIN v_annual_permits_mix p USING (code, year)
         WHERE i.year IN (select * from UNNEST(?))
         ORDER BY code, year;
   """, [years]).df()
