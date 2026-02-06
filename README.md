@@ -26,6 +26,8 @@ The project is designed as a **reference implementation** for:
 
 This is **not** a predictive model. The focus is clarity, reproducibility, and extensibility.
 
+v2.1 adds unit-level permit composition (1-unit, 3–4 unit, 5+ unit) to distinguish how housing is being built, not just how much. This enables clearer interpretation of supply responsiveness in constrained metros.
+
 ---
 
 ## Why This Project Exists
@@ -100,6 +102,7 @@ pyproject.toml
 ### Census — Building Permits Survey
 - Monthly CBSA‑level housing permits
 - Aggregated to annual totals during processing
+- 1 Unit and 5 Units+ provide info on how dense the new construction is
 
 ### Census — Population Estimates
 - Annual CBSA population totals
@@ -215,5 +218,6 @@ This preserves reproducibility while allowing controlled expansion.
 - Introduced Parquet lake as optional extension
 - Clarified scope and classification logic
 - Added architecture section
+- Added permits density data to the permits chart
 
-Last updated: 2026‑02‑05
+Last updated: 2026‑02‑06
