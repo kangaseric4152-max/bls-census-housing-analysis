@@ -24,9 +24,9 @@ The figures below are illustrative examples generated from the pipeline; users a
 ![Cumulative structural gap: a chart of housing pressure over time for 5 metropolitan areas, Austin, Minneapolis, Portland, Seattle, DC and surrounding areas from 2014 to 2023. Seattle mostly stays above the dotted 1.0 line, but after 2022 goes above 2.0, while Mineappolis and Austin mostly stay below. ](outputs/cumulative_gap.png)
 
 
-Annual Permits                   |   Year-over-Year Change in Permits
-:-------------------------------:|:-------------------------------:
-![](outputs/annual_housing.png)  | ![](outputs/yoy_permits.png)
+Annual Permits                   |   Year-over-Year Change in Permits   | Population
+:-------------------------------:|:------------------------------------:|:-------------------:
+![](outputs/annual_housing.png)  | ![](outputs/yoy_permits.png)         | ![](outputs/pop_change.png)
 
 ---
 
@@ -236,5 +236,6 @@ This preserves reproducibility while allowing controlled expansion.
 - Clarified scope and classification logic
 - Added architecture section
 - Added permits density data to the permits chart
+- Added population chart 
 
-Last updated: 2026‑02‑06
+Last updated: 2026‑02‑07
