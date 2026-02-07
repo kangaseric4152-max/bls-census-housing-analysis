@@ -45,6 +45,8 @@ This is **not** a predictive model. The focus is clarity, reproducibility, and e
 
 v2.1 adds unit-level permit composition (1-unit, 3–4 unit, 5+ unit) to distinguish how housing is being built, not just how much. This enables clearer interpretation of supply responsiveness in constrained metros.
 
+v2.1.1 adds a chart that composes yearly population change and population data as valuable context for reading the other charts.
+
 ---
 
 ## Why This Project Exists
