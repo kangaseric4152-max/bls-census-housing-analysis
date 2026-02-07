@@ -17,7 +17,7 @@ mainly for orchestration, CLI utilities, and controlled ingestion.
 
 ---
 
-Charts
+## Charts
 
 The figures below are illustrative examples generated from the pipeline; users are encouraged to derive their own views using SQL, pandas, or other tools.
 
@@ -30,7 +30,8 @@ Annual Permits                   |   Year-over-Year Change in Permits
 
 ---
 
-Primary data sources:
+## Primary data sources:
+
 - **Bureau of Labor Statistics (BLS)** — Quarterly Census of Employment and Wages (QCEW)
 - **U.S. Census Bureau** — Building Permits Survey (BPS) and Population Estimates
 
