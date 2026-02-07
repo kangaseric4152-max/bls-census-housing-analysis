@@ -100,3 +100,53 @@ def build_cumulative_metrics(con: duckdb.DuckDBPyConnection,
     df = con.execute(q, [base_year, years]).df()
     logging.getLogger(__name__).info("build_cumulative_metrics: returned rows=%d", len(df))
     return df
+
+
+
+def get_pop_change_df(con: duckdb.DuckDBPyConnection, cumulative_df: pd.DataFrame):
+    return con.sql("""
+        SELECT 
+            c.area,
+            c.code,
+            concat(area, ' (', 
+                            printf('%.2f', round(first_value(c.population) over (partition by code order by year desc) / 1e6, 2)), 
+                            'M)') as area_pop,
+            c.year,
+            c.population,
+            (c.population - LAG(c.population) OVER (PARTITION BY c.Code ORDER BY c.Year ASC))
+                * 100.0 / LAG(c.population) OVER (PARTITION BY c.Code ORDER BY c.Year ASC)
+                AS pop_change
+        from cumulative_df c
+        order by Area, Year;
+        """).df()
+
+
+def get_overall_change_df(con: duckdb.DuckDBPyConnection, cumulative_df: pd.DataFrame):
+    return con.sql(
+        """
+        WITH base AS (
+        SELECT * FROM cumulative_df WHERE year BETWEEN 2014 AND 2023
+        ),
+        summary AS (
+        SELECT
+            code,
+            any_value(area) AS area,
+            arg_max(population, year) AS pop_last,
+            (arg_max(population, year) - arg_min(population, year)) * 100.0
+            / NULLIF(arg_min(population, year), 0) AS overall_pop_change_pct
+        FROM base
+        GROUP BY code
+        )
+        SELECT
+        code,
+        area,
+        pop_last,
+        overall_pop_change_pct,
+        concat(
+            area, ' (',
+            round(pop_last / 1000000.0, 2),
+            'M)'
+        ) AS area_pop_label
+        FROM summary
+        order by code;
+        """).df()
