@@ -216,8 +216,10 @@ To analyze additional years or metros:
 1. Run the ingest pipeline to fetch missing raw data
 2. Rebuild derived Parquet outputs
 3. Re‑run `build-data` to refresh analytical views
+4. data/views/v_qcew_quarterly_lake.sql has a switch to flip from the demo data to the lake and back for analysis
 
 This preserves reproducibility while allowing controlled expansion.
+
 
 ---
 
