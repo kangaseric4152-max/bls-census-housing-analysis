@@ -14,6 +14,21 @@ queryable Parquet datasets, DuckDB analytical views, and reproducible housing-pr
 This project treats **Parquet + DuckDB SQL as the primary transformation layer**; Python is used
 mainly for orchestration, CLI utilities, and controlled ingestion.
 
+The figures below are illustrative examples generated from the pipeline; users are encouraged to derive their own views using SQL, pandas, or other tools.
+
+---
+
+Charts
+
+![Cumulative structural gap: a chart of housing pressure over time for 5 metropolitan areas, Austin, Minneapolis, Portland, Seattle, DC and surrounding areas from 2014 to 2023. Seattle mostly stays above the dotted 1.0 line, but after 2022 goes above 2.0, while Mineappolis and Austin mostly stay below. ](outputs/cumulative_gap.png)
+
+
+Annual Permits                   |   Year-over-Year Change in Permits
+:-------------------------------:|:-------------------------------:
+![](outputs/annual_housing.png)  | ![](outputs/yoy_permits.png)
+
+---
+
 Primary data sources:
 - **Bureau of Labor Statistics (BLS)** — Quarterly Census of Employment and Wages (QCEW)
 - **U.S. Census Bureau** — Building Permits Survey (BPS) and Population Estimates
