@@ -225,6 +225,7 @@ This preserves reproducibility while allowing controlled expansion.
 
 ## Notes & Caveats
 
+- This project makes use of LLMs to accelerate iteration, validate assumptions, and refactor, with manual ownership of architecture and correctness.
 - Some metros have incomplete historical coverage
 - Small base‑year permit counts can amplify ratios
 - Known anomalies are tracked in `data/TODO`
