@@ -229,6 +229,7 @@ This preserves reproducibility while allowing controlled expansion.
 - Some metros have incomplete historical coverage
 - Small base‑year permit counts can amplify ratios
 - Known anomalies are tracked in `data/TODO`
+- Looked into adding dbt to the project and decided that Dagster would potentially fit more naturally here.
 
 ---
 
@@ -243,4 +244,4 @@ This preserves reproducibility while allowing controlled expansion.
 - Added permits density data to the permits chart
 - Added population chart 
 
-Last updated: 2026‑02‑07
+Last updated: 2026‑03‑19
